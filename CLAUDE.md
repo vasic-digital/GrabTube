@@ -19,6 +19,31 @@ GrabTube is a multi-platform tube services downloader - a GUI for yt-dlp with pl
 
 The Web-Client is a fork/variant of MeTube. Both clients communicate with the same Python backend to download videos from YouTube and 1000+ sites supported by yt-dlp.
 
+## Web-Client Submodule (READ-ONLY)
+
+**IMPORTANT**: The Web-Client directory is a **READ-ONLY** git submodule that tracks the upstream MeTube project:
+
+- **Upstream Repository**: `git@github.com:alexta69/metube.git`
+- **Purpose**: Reference implementation for Angular frontend
+- **Configuration**:
+  - Git is configured to ignore all changes in Web-Client (`ignore = all`)
+  - Push URL is blocked to prevent accidental upstream pushes
+  - Only `git fetch` and `git pull` operations are allowed
+
+### Working with Web-Client
+
+**DO**:
+- Read code from Web-Client for reference
+- Update submodule to latest upstream: `cd Web-Client && git fetch && git pull origin master`
+- Use as inspiration for Flutter Web client features
+
+**DO NOT**:
+- Modify files in Web-Client directory
+- Commit changes to Web-Client
+- Push to Web-Client upstream
+
+**Important**: All GrabTube-specific branding and features should be implemented in the Flutter-Client (including flutter-web) instead of modifying Web-Client.
+
 ## Architecture
 
 ### Backend (Python)

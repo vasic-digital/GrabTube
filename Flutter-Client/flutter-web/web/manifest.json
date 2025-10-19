@@ -4,7 +4,7 @@
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
-    "theme_color": "#2196F3",
+    "theme_color": "#E74C3C",
     "description": "Modern web interface for downloading videos with yt-dlp",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
