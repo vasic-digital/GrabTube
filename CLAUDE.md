@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-GrabTube is a tube services downloader - a web-based GUI for yt-dlp with playlist support. The project consists of:
-- **Web-Client**: The main application (Python backend + Angular frontend)
-- **Android-Client**, **Desktop-Client**, **iOS-Client**: Placeholder directories for future client implementations
+GrabTube is a multi-platform tube services downloader - a GUI for yt-dlp with playlist support. The project consists of:
+- **Web-Client**: Python (aiohttp) backend + Angular 19 frontend - production ready
+- **Flutter-Client**: Cross-platform client (Android, iOS, Windows, macOS, Linux) - production ready with >80% test coverage
+- **Android-Client**, **Desktop-Client**, **iOS-Client**: Placeholder directories (superseded by Flutter-Client)
 
-The Web-Client is a fork/variant of MeTube, providing a user-friendly interface to download videos from YouTube and dozens of other sites supported by yt-dlp.
+The Web-Client is a fork/variant of MeTube. Both clients communicate with the same Python backend to download videos from YouTube and 1000+ sites supported by yt-dlp.
 
 ## Architecture
 
@@ -34,9 +35,9 @@ The backend is an **aiohttp** async web server with **Socket.IO** for real-time 
   - Handles special cases like iOS-compatible formats, audio extraction, thumbnails
   - Configures postprocessors (FFmpeg operations) based on format selection
 
-### Frontend (Angular 19)
-Located in `ui/` directory:
+### Frontend Options
 
+#### Angular Client (Web-Client/ui/)
 - Built with Angular 19, Bootstrap 5, Font Awesome icons
 - Uses Socket.IO client (`ngx-socket-io`) for real-time updates from backend
 - Main component: `ui/src/app/app.component.ts` - handles UI state and user interactions
@@ -45,8 +46,20 @@ Located in `ui/` directory:
   - `speed.service.ts`: Calculates and formats download speeds
 - Theme support: `theme.ts` manages light/dark/auto theme switching
 
+#### Flutter Client (Flutter-Client/)
+- Cross-platform support: Android, iOS, Windows, macOS, Linux
+- **Clean Architecture** with BLoC pattern for state management
+- Directory structure:
+  - `lib/core/`: Constants, DI setup, network layer (API client, WebSocket)
+  - `lib/data/`: Models with JSON serialization, repository implementations
+  - `lib/domain/`: Business entities, repository interfaces, use cases
+  - `lib/presentation/`: BLoC state management, pages, widgets
+- Tech stack: flutter_bloc, dio, socket_io_client, hive (local storage)
+- **Comprehensive testing**: >80% coverage with unit, widget, integration, and E2E tests (Patrol)
+- Build with: `flutter pub run build_runner build --delete-conflicting-outputs` (for code generation)
+
 ### Communication Flow
-1. User submits download via Angular UI
+1. User submits download via Angular/Flutter UI
 2. HTTP POST to `/add` endpoint with URL, quality, format, folder, etc.
 3. Backend extracts video info using yt-dlp, creates Download object
 4. Download added to queue, Socket.IO emits 'added' event to UI
@@ -55,34 +68,42 @@ Located in `ui/` directory:
 
 ## Development Commands
 
-### Building and Running Locally
+### Python Backend (Web-Client/)
 
-**Prerequisites**: Node.js (LTS), Python 3.13, and uv package manager
+**Prerequisites**: Python 3.13, uv package manager
 
 ```bash
-# Build the Angular UI
-cd Web-Client/ui
-npm install
-node_modules/.bin/ng build
+cd Web-Client
 
-# Install Python dependencies and run
-cd ..
+# Install dependencies
 uv sync
-uv run python3 app/main.py
+
+# Install dev dependencies (includes pylint)
+uv sync --dev
+
+# Run backend server
+uv run python3 app/main.py  # Starts on http://0.0.0.0:8081
+
+# Run linter
+uv run pylint app/
 ```
 
-The server will start on `http://0.0.0.0:8081` by default.
+### Angular Client (Web-Client/ui/)
 
-### Angular Development
+**Prerequisites**: Node.js (LTS)
 
 ```bash
 cd Web-Client/ui
+
+# Install dependencies
+npm install
 
 # Development server with hot reload
 npm run start        # Serves on http://localhost:4200
 
 # Build for production
 npm run build        # Output to ui/dist/metube/browser
+node_modules/.bin/ng build  # Alternative
 
 # Run tests
 npm test
@@ -94,26 +115,70 @@ npm run lint
 npm run e2e
 ```
 
-### Python Development
+### Flutter Client (Flutter-Client/)
+
+**Prerequisites**: Flutter SDK 3.24+, Dart SDK 3.5+
+
+```bash
+cd Flutter-Client
+
+# Install dependencies
+flutter pub get
+
+# Run code generation (for JSON serialization, DI, etc.)
+flutter pub run build_runner build --delete-conflicting-outputs
+
+# Run on current device/platform
+flutter run
+
+# Run on specific platform
+flutter run -d chrome              # Web
+flutter run -d macos              # macOS
+flutter run -d windows            # Windows
+
+# Build for production
+flutter build apk --release        # Android APK
+flutter build appbundle --release  # Android App Bundle
+flutter build ios --release        # iOS
+flutter build linux --release      # Linux
+flutter build windows --release    # Windows
+flutter build macos --release      # macOS
+flutter build web --release        # Web
+
+# Run all tests with coverage
+./tools/run_tests.sh
+
+# Run specific test suites
+flutter test test/unit             # Unit tests
+flutter test test/widget           # Widget tests
+flutter test test/integration      # Integration tests
+patrol test                        # E2E tests
+
+# Run AI-powered test validation
+python3 tools/ai_test_validator.py
+
+# Code analysis
+flutter analyze
+```
+
+### Docker (Web-Client/)
 
 ```bash
 cd Web-Client
 
-# Install dev dependencies
-uv sync --dev
-
-# Run linter
-uv run pylint app/
-```
-
-### Docker
-
-```bash
 # Build Docker image
 docker build -t grabtube .
 
 # Run container
 docker run -d -p 8081:8081 -v /path/to/downloads:/downloads grabtube
+
+# Run with custom options
+docker run -d \
+  -p 8081:8081 \
+  -v /path/to/downloads:/downloads \
+  -e DOWNLOAD_MODE=limited \
+  -e MAX_CONCURRENT_DOWNLOADS=5 \
+  grabtube
 ```
 
 ## Configuration
@@ -163,8 +228,64 @@ yt-dlp --help
 
 This allows testing yt-dlp directly with the same environment as the application.
 
-## Project Structure Notes
+## Project Structure
 
-- The repository has placeholder directories for Android, Desktop, and iOS clients, but these are currently empty
-- The active component is Web-Client, which is a complete standalone application
-- Upstreams directory exists (likely for git submodules tracking upstream dependencies)
+```
+GrabTube/
+├── Web-Client/               # Python backend + Angular frontend
+│   ├── app/                  # Python backend code
+│   │   ├── main.py          # aiohttp server, Socket.IO, API endpoints
+│   │   ├── ytdl.py          # Download queue, multiprocessing
+│   │   └── dl_formats.py    # yt-dlp format string generation
+│   ├── ui/                   # Angular 19 frontend
+│   │   ├── src/app/         # Components, services
+│   │   └── package.json     # npm dependencies
+│   ├── Dockerfile           # Multi-stage build (Node + Python)
+│   ├── pyproject.toml       # Python dependencies (uv)
+│   └── uv.lock              # Locked dependencies
+├── Flutter-Client/          # Cross-platform Flutter client
+│   ├── lib/                 # Dart/Flutter source code
+│   │   ├── core/            # DI, network, constants
+│   │   ├── data/            # Models, repositories
+│   │   ├── domain/          # Entities, use cases
+│   │   └── presentation/    # BLoC, pages, widgets
+│   ├── test/                # Unit, widget, integration tests
+│   ├── tools/               # Testing scripts, AI validator
+│   ├── pubspec.yaml         # Flutter dependencies
+│   └── docs/                # Architecture, API, user guides
+├── Android-Client/          # Placeholder (use Flutter-Client instead)
+├── Desktop-Client/          # Placeholder (use Flutter-Client instead)
+├── iOS-Client/              # Placeholder (use Flutter-Client instead)
+├── Upstreams/               # Git submodules (upstream dependencies)
+└── CLAUDE.md               # This file
+```
+
+## API Endpoints Reference
+
+### HTTP Endpoints (Backend)
+- `POST /add` - Add download (params: url, quality, format, folder, auto_start)
+- `GET /queue` - Get active downloads
+- `GET /done` - Get completed downloads
+- `GET /pending` - Get pending downloads (auto_start=False)
+- `POST /delete` - Delete download by ID
+- `POST /start` - Start pending download by ID
+- `POST /clear` - Clear completed downloads
+- `GET /history` - Get download history
+- `GET /info` - Get video info without downloading
+
+### WebSocket Events (Socket.IO)
+- `connect` - Client connects to server
+- `added` - Download added to queue (server → client)
+- `updated` - Download progress update (server → client)
+- `completed` - Download finished (server → client)
+- `canceled` - Download canceled (server → client)
+- `cleared` - Queue cleared (server → client)
+
+## Important Notes
+
+- **Backend serves both frontends**: Angular build is in `ui/dist/metube/browser/`, served as static files
+- **Download isolation**: Each download runs in separate Python process (multiprocessing) to isolate yt-dlp
+- **Queue persistence**: Uses Python `shelve` module, stored in `STATE_DIR` (default: `/downloads/.metube`)
+- **File watching**: If `YTDL_OPTIONS_FILE` is set, backend watches for changes using `watchfiles`
+- **Flutter code generation**: Run `flutter pub run build_runner build` after modifying models, repositories, or DI
+- **Flutter testing**: Comprehensive test suite with >80% coverage; use `./tools/run_tests.sh` before commits
