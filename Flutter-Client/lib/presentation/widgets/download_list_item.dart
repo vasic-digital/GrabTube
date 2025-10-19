@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../domain/entities/download.dart';
+import 'grabtube_progress_indicator.dart';
 
 class DownloadListItem extends StatelessWidget {
   const DownloadListItem({
@@ -151,27 +152,24 @@ class DownloadListItem extends StatelessWidget {
               // Progress bar
               if (download.isActive) ...[
                 const SizedBox(height: 12),
-                Column(
+                Row(
                   children: [
-                    LinearProgressIndicator(
-                      value: download.progress,
-                      minHeight: 6,
-                      borderRadius: BorderRadius.circular(3),
+                    // Animated arrow progress indicator
+                    GrabTubeProgressIndicator(
+                      progress: download.progress ?? 0.0,
+                      size: 32,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '${download.progressPercentage}%',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        if (download.fileSize != null)
-                          Text(
-                            _formatBytes(download.fileSize!),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                      ],
+                    const SizedBox(width: 12),
+                    // Linear progress bar with percentage
+                    Expanded(
+                      child: GrabTubeLinearProgress(
+                        progress: download.progress ?? 0.0,
+                        height: 8,
+                        showPercentage: true,
+                        label: download.fileSize != null
+                            ? _formatBytes(download.fileSize!)
+                            : null,
+                      ),
                     ),
                   ],
                 ),

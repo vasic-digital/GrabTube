@@ -1,6 +1,8 @@
-# GrabTube - Universal Tube Services Downloader
-
 <div align="center">
+
+<img src="Assets/Logo.jpeg" alt="GrabTube Logo" width="300"/>
+
+# GrabTube - Universal Tube Services Downloader
 
 **A cutting-edge, multi-platform video downloader with modern UI/UX**
 

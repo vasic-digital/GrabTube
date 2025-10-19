@@ -89,6 +89,10 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   very_good_analysis: ^6.0.0
 
+  # App Icons & Splash
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
+
 flutter:
   uses-material-design: true
 
@@ -107,3 +111,50 @@ flutter:
           weight: 600
         - asset: assets/fonts/Inter-Bold.ttf
           weight: 700
+
+# Flutter Launcher Icons Configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.jpeg"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/logo.jpeg"
+  windows:
+    generate: true
+    image_path: "assets/images/logo.jpeg"
+  macos:
+    generate: true
+    image_path: "assets/images/logo.jpeg"
+  linux:
+    generate: true
+    image_path: "assets/images/logo.jpeg"
+  web:
+    generate: true
+    image_path: "assets/images/logo.jpeg"
+    background_color: "#FFFFFF"
+    theme_color: "#E74C3C"
+
+# Flutter Native Splash Configuration
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: "assets/images/logo.jpeg"
+  android: true
+  ios: true
+  web: true
+
+  android_12:
+    color: "#FFFFFF"
+    image: "assets/images/logo.jpeg"
+
+  # Platform-specific splash screens
+  android_gravity: center
+  ios_content_mode: center
+  web_image_mode: center
+
+  # Brand colors from logo
+  color_dark: "#2C3E50"
+  image_dark: "assets/images/logo.jpeg"
+
+  android_12_dark:
+    color: "#2C3E50"
+    image: "assets/images/logo.jpeg"

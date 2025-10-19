@@ -32,8 +32,9 @@ class GrabTubeApp extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.blue,
+        seedColor: const Color(0xFFE74C3C), // GrabTube red from logo
         brightness: Brightness.light,
+        secondary: const Color(0xFF2C3E50), // Dark charcoal from logo
       ),
       fontFamily: 'Inter',
       appBarTheme: const AppBarTheme(
@@ -71,8 +72,9 @@ class GrabTubeApp extends StatelessWidget {
     return ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.blue,
+        seedColor: const Color(0xFFE74C3C), // GrabTube red from logo
         brightness: Brightness.dark,
+        secondary: const Color(0xFF2C3E50), // Dark charcoal from logo
       ),
       fontFamily: 'Inter',
       appBarTheme: const AppBarTheme(

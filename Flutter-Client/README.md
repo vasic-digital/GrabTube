@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![GrabTube Logo](assets/images/logo.png)
+<img src="assets/images/logo.jpeg" alt="GrabTube Logo" width="300"/>
 
 **A cutting-edge, multi-platform tube services downloader**
 

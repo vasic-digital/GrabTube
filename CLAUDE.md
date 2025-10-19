@@ -1,4 +1,12 @@
+<div align="center">
+
+<img src="Assets/Logo.jpeg" alt="GrabTube Logo" width="250"/>
+
 # CLAUDE.md
+
+**Project guidance for Claude Code**
+
+</div>
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -280,6 +288,67 @@ GrabTube/
 - `completed` - Download finished (server → client)
 - `canceled` - Download canceled (server → client)
 - `cleared` - Queue cleared (server → client)
+
+## Branding and Animations
+
+### Logo and Brand Colors
+GrabTube uses a consistent brand identity across all clients:
+
+**Logo**: `Assets/Logo.jpeg` - Red rounded rectangle with white download arrow
+- **Primary Red**: `#E74C3C` - Main brand color (background)
+- **Dark Charcoal**: `#2C3E50` - Arrow outline, dark theme background
+- **White**: `#FFFFFF` - Arrow fill, light theme background
+- **Light Gray**: `#ECF0F1` - Dark theme text
+
+### Lottie Animations
+
+The project includes two custom Lottie animations matching the logo design:
+
+#### Splash Animation (`splash_logo.json`)
+Located: `Flutter-Client/assets/animations/splash_logo.json`
+- Animation sequence:
+  1. Red rounded rectangle fades in and scales up (0-30 frames)
+  2. White arrow with dark outline drops down from top (40-70 frames)
+  3. Arrow settles with subtle bounce effect (70-100 frames)
+  4. Final frame shows complete logo matching `Logo.jpeg`
+- Duration: 2.5 seconds (150 frames @ 60fps)
+- Used for: App splash screens on all platforms
+
+#### Progress Indicator (`progress_arrow.json`)
+Located: `Flutter-Client/assets/animations/progress_arrow.json`
+- Features:
+  - Gray arrow outline (background)
+  - White arrow fill (mid-layer)
+  - Red fill that animates from bottom to top (0-100 frames)
+  - Progress controlled by animation frame (0% = frame 0, 100% = frame 100)
+- Used for: Download progress visualization in Flutter client
+
+### Progress Indicator Widgets (Flutter)
+
+Three custom widgets in `lib/presentation/widgets/grabtube_progress_indicator.dart`:
+
+1. **`GrabTubeProgressIndicator`**: Animated arrow icon that fills with progress
+   - Parameters: `progress` (0.0-1.0), `size`, `showPercentage`, `textColor`
+   - Uses Lottie animation for smooth visual feedback
+
+2. **`GrabTubeLinearProgress`**: Horizontal progress bar with brand colors
+   - Parameters: `progress`, `height`, `showPercentage`, `label`
+   - Includes animated gradient fill and percentage text
+
+3. **`GrabTubeCircularProgress`**: Circular progress with arrow icon in center
+   - Parameters: `progress`, `size`, `strokeWidth`, `showPercentage`
+   - Combines CircularProgressIndicator with animated arrow
+
+**Usage Example**:
+```dart
+GrabTubeProgressIndicator(
+  progress: 0.65, // 65% complete
+  size: 48,
+  showPercentage: true,
+)
+```
+
+All progress indicators are fully tested with unit tests (`test/widget/grabtube_progress_indicator_test.dart`) and integration tests (`test/integration/progress_indicator_integration_test.dart`).
 
 ## Important Notes
 
