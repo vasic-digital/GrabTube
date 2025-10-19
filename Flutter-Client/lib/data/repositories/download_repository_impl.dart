@@ -155,6 +155,29 @@ class DownloadRepositoryImpl implements DownloadRepository {
   }
 
   @override
+  Future<void> redownload({
+    required String url,
+    String? quality,
+    String? format,
+    String? folder,
+    bool? autoStart,
+  }) async {
+    try {
+      AppLogger.info('Re-downloading from history: $url');
+      await _apiClient.redownload(
+        url: url,
+        quality: quality,
+        format: format,
+        folder: folder,
+        autoStart: autoStart,
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to redownload', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  @override
   Future<void> clearCompleted() async {
     try {
       AppLogger.info('Clearing completed downloads');

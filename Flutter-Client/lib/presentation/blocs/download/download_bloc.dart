@@ -24,6 +24,8 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
     on<DownloadAdded>(_onDownloadAdded);
     on<DownloadCompleted>(_onDownloadCompleted);
     on<DownloadCanceled>(_onDownloadCanceled);
+    on<LoadHistory>(_onLoadHistory);
+    on<RedownloadFromHistory>(_onRedownloadFromHistory);
 
     _initializeSocketListeners();
   }
@@ -286,6 +288,57 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
   ) async {
     // Refresh downloads to reflect cancellation
     add(const LoadDownloads());
+  }
+
+  Future<void> _onLoadHistory(
+    LoadHistory event,
+    Emitter<DownloadState> emit,
+  ) async {
+    try {
+      emit(const HistoryLoading());
+
+      final history = await _repository.getHistory();
+
+      emit(HistoryLoaded(history: history));
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to load history', e, stackTrace);
+      emit(DownloadError(
+        message: 'Failed to load history: ${e.toString()}',
+        error: e,
+      ));
+    }
+  }
+
+  Future<void> _onRedownloadFromHistory(
+    RedownloadFromHistory event,
+    Emitter<DownloadState> emit,
+  ) async {
+    try {
+      emit(const DownloadOperationInProgress(
+        message: 'Re-downloading from history...',
+      ));
+
+      await _repository.redownload(
+        url: event.url,
+        quality: event.quality,
+        format: event.format,
+        folder: event.folder,
+        autoStart: event.autoStart,
+      );
+
+      emit(const DownloadOperationSuccess(
+        message: 'Re-download started successfully',
+      ));
+
+      // Reload downloads
+      add(const LoadDownloads());
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to redownload from history', e, stackTrace);
+      emit(DownloadError(
+        message: 'Failed to redownload: ${e.toString()}',
+        error: e,
+      ));
+    }
   }
 
   @override

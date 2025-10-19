@@ -8,6 +8,7 @@ import '../blocs/download/download_state.dart';
 import '../widgets/download_list_item.dart';
 import '../widgets/add_download_dialog.dart';
 import '../widgets/empty_state_widget.dart';
+import 'history_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -44,6 +45,21 @@ class _HomePageState extends State<HomePage>
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'History',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider.value(
+                    value: context.read<DownloadBloc>(),
+                    child: const HistoryPage(),
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',

@@ -111,3 +111,28 @@ class GetVideoInfo extends DownloadEvent {
   @override
   List<Object?> get props => [url];
 }
+
+/// Load download history
+class LoadHistory extends DownloadEvent {
+  const LoadHistory();
+}
+
+/// Re-download from history
+class RedownloadFromHistory extends DownloadEvent {
+  const RedownloadFromHistory({
+    required this.url,
+    this.quality,
+    this.format,
+    this.folder,
+    this.autoStart = true,
+  });
+
+  final String url;
+  final String? quality;
+  final String? format;
+  final String? folder;
+  final bool autoStart;
+
+  @override
+  List<Object?> get props => [url, quality, format, folder, autoStart];
+}

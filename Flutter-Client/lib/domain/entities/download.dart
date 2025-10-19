@@ -27,6 +27,17 @@ class Download extends Equatable {
     this.downloadedSize,
     this.error,
     this.timestamp,
+    // Rich metadata fields
+    this.description,
+    this.duration,
+    this.uploader,
+    this.viewCount,
+    this.uploadDate,
+    this.webpageUrl,
+    this.extractor,
+    this.likeCount,
+    this.channelId,
+    this.channelUrl,
   });
 
   final String id;
@@ -45,6 +56,18 @@ class Download extends Equatable {
   final String? error;
   final DateTime? timestamp;
 
+  // Rich metadata fields
+  final String? description;
+  final int? duration; // Duration in seconds
+  final String? uploader;
+  final int? viewCount;
+  final String? uploadDate;
+  final String? webpageUrl;
+  final String? extractor;
+  final int? likeCount;
+  final String? channelId;
+  final String? channelUrl;
+
   /// Create a copy with updated fields
   Download copyWith({
     String? id,
@@ -62,6 +85,16 @@ class Download extends Equatable {
     int? downloadedSize,
     String? error,
     DateTime? timestamp,
+    String? description,
+    int? duration,
+    String? uploader,
+    int? viewCount,
+    String? uploadDate,
+    String? webpageUrl,
+    String? extractor,
+    int? likeCount,
+    String? channelId,
+    String? channelUrl,
   }) {
     return Download(
       id: id ?? this.id,
@@ -79,6 +112,16 @@ class Download extends Equatable {
       downloadedSize: downloadedSize ?? this.downloadedSize,
       error: error ?? this.error,
       timestamp: timestamp ?? this.timestamp,
+      description: description ?? this.description,
+      duration: duration ?? this.duration,
+      uploader: uploader ?? this.uploader,
+      viewCount: viewCount ?? this.viewCount,
+      uploadDate: uploadDate ?? this.uploadDate,
+      webpageUrl: webpageUrl ?? this.webpageUrl,
+      extractor: extractor ?? this.extractor,
+      likeCount: likeCount ?? this.likeCount,
+      channelId: channelId ?? this.channelId,
+      channelUrl: channelUrl ?? this.channelUrl,
     );
   }
 
@@ -117,5 +160,15 @@ class Download extends Equatable {
         downloadedSize,
         error,
         timestamp,
+        description,
+        duration,
+        uploader,
+        viewCount,
+        uploadDate,
+        webpageUrl,
+        extractor,
+        likeCount,
+        channelId,
+        channelUrl,
       ];
 }

@@ -21,6 +21,17 @@ class DownloadModel {
     this.downloadedSize,
     this.error,
     this.timestamp,
+    // Rich metadata
+    this.description,
+    this.duration,
+    this.uploader,
+    this.viewCount,
+    this.uploadDate,
+    this.webpageUrl,
+    this.extractor,
+    this.likeCount,
+    this.channelId,
+    this.channelUrl,
   });
 
   factory DownloadModel.fromJson(Map<String, dynamic> json) =>
@@ -44,6 +55,24 @@ class DownloadModel {
   final String? error;
   final String? timestamp;
 
+  // Rich metadata fields
+  final String? description;
+  final int? duration;
+  final String? uploader;
+  @JsonKey(name: 'view_count')
+  final int? viewCount;
+  @JsonKey(name: 'upload_date')
+  final String? uploadDate;
+  @JsonKey(name: 'webpage_url')
+  final String? webpageUrl;
+  final String? extractor;
+  @JsonKey(name: 'like_count')
+  final int? likeCount;
+  @JsonKey(name: 'channel_id')
+  final String? channelId;
+  @JsonKey(name: 'channel_url')
+  final String? channelUrl;
+
   Map<String, dynamic> toJson() => _$DownloadModelToJson(this);
 
   /// Convert to domain entity
@@ -64,6 +93,16 @@ class DownloadModel {
       downloadedSize: downloadedSize,
       error: error,
       timestamp: timestamp != null ? DateTime.tryParse(timestamp!) : null,
+      description: description,
+      duration: duration,
+      uploader: uploader,
+      viewCount: viewCount,
+      uploadDate: uploadDate,
+      webpageUrl: webpageUrl,
+      extractor: extractor,
+      likeCount: likeCount,
+      channelId: channelId,
+      channelUrl: channelUrl,
     );
   }
 
@@ -85,6 +124,16 @@ class DownloadModel {
       downloadedSize: download.downloadedSize,
       error: download.error,
       timestamp: download.timestamp?.toIso8601String(),
+      description: download.description,
+      duration: download.duration,
+      uploader: download.uploader,
+      viewCount: download.viewCount,
+      uploadDate: download.uploadDate,
+      webpageUrl: download.webpageUrl,
+      extractor: download.extractor,
+      likeCount: download.likeCount,
+      channelId: download.channelId,
+      channelUrl: download.channelUrl,
     );
   }
 

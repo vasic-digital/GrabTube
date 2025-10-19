@@ -36,6 +36,15 @@ abstract class DownloadRepository {
   /// Get download history
   Future<List<Download>> getHistory();
 
+  /// Re-download from history
+  Future<void> redownload({
+    required String url,
+    String? quality,
+    String? format,
+    String? folder,
+    bool? autoStart,
+  });
+
   /// Clear completed downloads
   Future<void> clearCompleted();
 

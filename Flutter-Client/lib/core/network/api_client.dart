@@ -55,6 +55,19 @@ abstract class ApiClient {
   @GET('/history')
   Future<List<DownloadModel>> getHistory();
 
+  /// Re-download from history
+  @POST('/redownload')
+  Future<Map<String, dynamic>> redownload({
+    @Field('url') required String url,
+    @Field('quality') String? quality,
+    @Field('format') String? format,
+    @Field('folder') String? folder,
+    @Field('custom_name_prefix') String? customNamePrefix,
+    @Field('playlist_strict_mode') bool? playlistStrictMode,
+    @Field('playlist_item_limit') int? playlistItemLimit,
+    @Field('auto_start') bool? autoStart,
+  });
+
   /// Clear completed downloads
   @POST('/clear')
   Future<Map<String, dynamic>> clearCompleted();

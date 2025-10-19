@@ -110,3 +110,18 @@ class VideoInfoLoaded extends DownloadState {
 class VideoInfoLoading extends DownloadState {
   const VideoInfoLoading();
 }
+
+/// History loaded successfully
+class HistoryLoaded extends DownloadState {
+  const HistoryLoaded({required this.history});
+
+  final List<Download> history;
+
+  @override
+  List<Object?> get props => [history];
+}
+
+/// History loading
+class HistoryLoading extends DownloadState {
+  const HistoryLoading();
+}
