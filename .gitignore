@@ -6,6 +6,7 @@
 build/
 flutter_*.tar.xz
 flutter/
+.flutter/
 android/app/build/
 android/build/
 ios/Flutter/App.framework

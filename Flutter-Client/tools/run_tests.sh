@@ -24,7 +24,7 @@ rm -f test_validation_report.json
 
 # Run tests with coverage
 echo -e "\n${YELLOW}Running unit tests with coverage...${NC}"
-flutter test test/unit --coverage || {
+./flutter_wrapper.sh test test/unit --coverage || {
     echo -e "${RED}❌ Unit tests failed${NC}"
     exit 1
 }
@@ -33,7 +33,7 @@ echo -e "\n${GREEN}✅ Unit tests passed${NC}"
 
 # Run widget tests
 echo -e "\n${YELLOW}Running widget tests...${NC}"
-flutter test test/widget || {
+./flutter_wrapper.sh test test/widget || {
     echo -e "${RED}❌ Widget tests failed${NC}"
     exit 1
 }
@@ -42,7 +42,7 @@ echo -e "\n${GREEN}✅ Widget tests passed${NC}"
 
 # Run integration tests
 echo -e "\n${YELLOW}Running integration tests...${NC}"
-flutter test test/integration || {
+./flutter_wrapper.sh test test/integration || {
     echo -e "${RED}❌ Integration tests failed${NC}"
     exit 1
 }
@@ -51,7 +51,7 @@ echo -e "\n${GREEN}✅ Integration tests passed${NC}"
 
 # Run e2e tests
 echo -e "\n${YELLOW}Running e2e tests...${NC}"
-flutter test test/e2e --flavor development || {
+./flutter_wrapper.sh test test/e2e --flavor development || {
     echo -e "${RED}❌ E2E tests failed${NC}"
     exit 1
 }

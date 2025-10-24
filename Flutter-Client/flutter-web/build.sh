@@ -17,27 +17,28 @@ echo -e "${BLUE}║   GrabTube Flutter Web Build Script   ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════╝${NC}"
 echo ""
 
-# Check if Flutter is installed
-if ! command -v flutter &> /dev/null; then
-    echo -e "${RED}❌ Flutter is not installed${NC}"
-    echo -e "${YELLOW}   Please install Flutter: https://flutter.dev/docs/get-started/install${NC}"
+# Check if Flutter wrapper is available
+FLUTTER_WRAPPER="../flutter_wrapper.sh"
+if [ ! -x "$FLUTTER_WRAPPER" ]; then
+    echo -e "${RED}❌ Flutter wrapper not found at $FLUTTER_WRAPPER${NC}"
+    echo -e "${YELLOW}   Please run this script from the flutter-web directory${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}✓${NC} Flutter found: $(flutter --version | head -n 1)"
+echo -e "${GREEN}✓${NC} Flutter wrapper found"
 
 # Clean previous build
 echo -e "\n${BLUE}Cleaning previous build...${NC}"
-flutter clean
+"$FLUTTER_WRAPPER" clean
 
 # Get dependencies
 echo -e "\n${BLUE}Getting dependencies...${NC}"
-flutter pub get
+"$FLUTTER_WRAPPER" pub get
 
 # Run code generation (if needed)
 if grep -q "build_runner" pubspec.yaml; then
     echo -e "\n${BLUE}Running code generation...${NC}"
-    flutter pub run build_runner build --delete-conflicting-outputs
+    "$FLUTTER_WRAPPER" pub run build_runner build --delete-conflicting-outputs
 fi
 
 # Build for production
@@ -52,7 +53,7 @@ else
     echo -e "${YELLOW}Using HTML renderer (better compatibility)${NC}"
 fi
 
-flutter build web --release --web-renderer $RENDERER
+"$FLUTTER_WRAPPER" build web --release --web-renderer $RENDERER
 
 if [ $? -eq 0 ]; then
     echo -e "\n${GREEN}✅ Build successful!${NC}"

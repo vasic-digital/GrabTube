@@ -44,11 +44,15 @@ object AppModule {
             GrabTubeDatabase::class.java,
             GrabTubeDatabase.DATABASE_NAME
         )
-            .addMigrations(GrabTubeDatabase.MIGRATION_1_2)
+            .addMigrations(GrabTubeDatabase.MIGRATION_1_2, GrabTubeDatabase.MIGRATION_2_3)
             .build()
     }
 
     @Provides
     @Singleton
     fun provideDownloadDao(database: GrabTubeDatabase) = database.downloadDao()
+
+    @Provides
+    @Singleton
+    fun provideScheduleDao(database: GrabTubeDatabase) = database.scheduleDao()
 }
