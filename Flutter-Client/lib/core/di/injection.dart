@@ -3,6 +3,8 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+import '../network/python_service_client.dart';
+import '../network/native_python_bridge.dart';
 import 'injection.config.dart';
 
 final getIt = GetIt.instance;

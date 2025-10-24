@@ -1,0 +1,5 @@
+# Python dependencies for GrabTube embedded service
+yt-dlp>=2024.4.9
+aiohttp>=3.9.0
+python-socketio[asyncio_client]>=5.10.0
+watchfiles>=0.21.0
