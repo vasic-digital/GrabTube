@@ -117,8 +117,30 @@ class _HistoryPageState extends State<HistoryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thumbnail section
-            _buildThumbnail(download),
+            // Thumbnail section with favorite indicator
+            Stack(
+              children: [
+                _buildThumbnail(download),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: IconButton(
+                    icon: Icon(
+                      download.isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: download.isFavorite ? Colors.red : Colors.white.withOpacity(0.8),
+                      shadows: download.isFavorite ? null : [
+                        const Shadow(
+                          color: Colors.black,
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    onPressed: () => _toggleFavorite(download),
+                    tooltip: download.isFavorite ? 'Remove from favorites' : 'Add to favorites',
+                  ),
+                ),
+              ],
+            ),
 
             // Content section
             Padding(
@@ -367,6 +389,21 @@ class _HistoryPageState extends State<HistoryPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Open: ${download.webpageUrl ?? download.url}')),
     );
+  }
+
+  void _toggleFavorite(Download download) async {
+    try {
+      await context.read<DownloadBloc>().toggleFavorite(download.id);
+      // Refresh the history to show updated favorite status
+      context.read<DownloadBloc>().add(const LoadHistory());
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update favorite: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   void _showHistoryDetails(Download download) {

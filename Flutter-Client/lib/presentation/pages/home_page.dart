@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/di/injection.dart';
 import '../blocs/download/download_bloc.dart';
 import '../blocs/download/download_event.dart';
 import '../blocs/download/download_state.dart';
+import '../blocs/search/search_bloc.dart';
 import '../widgets/download_list_item.dart';
 import '../widgets/add_download_dialog.dart';
 import '../widgets/empty_state_widget.dart';
 import 'history_page.dart';
+import 'search_page.dart';
 import 'jdownloader_dashboard_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -46,6 +50,21 @@ class _HomePageState extends State<HomePage>
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: 'Search & Favorites',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => getIt<SearchBloc>(),
+                    child: const SearchPage(),
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.cloud_download),
             tooltip: 'My JDownloader',

@@ -68,4 +68,10 @@ abstract class DownloadRepository {
 
   /// Stream of connection status
   Stream<bool> get connectionStatus;
+
+  /// Toggle favorite status of a download
+  Future<void> toggleFavorite(String downloadId);
+
+  /// Check if download is favorite
+  Future<bool> isFavorite(String downloadId);
 }

@@ -227,4 +227,49 @@ class DownloadRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun toggleFavorite(id: String): Result<Unit> {
+        return try {
+            val download = downloadDao.getById(id)
+                ?: return Result.failure(Exception("Download not found"))
+
+            downloadDao.updateFavorite(id, !download.isFavorite)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to toggle favorite")
+            Result.failure(e)
+        }
+    }
+
+    override fun observeFavorites(): Flow<List<Download>> {
+        return downloadDao.observeFavorites().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun searchDownloads(
+        query: String?,
+        favoritesOnly: Boolean,
+        status: String?,
+        sortBy: String,
+        limit: Int,
+        offset: Int
+    ): Result<Pair<List<Download>, Int>> {
+        return try {
+            val entities = downloadDao.searchDownloads(
+                query = query,
+                favoritesOnly = favoritesOnly,
+                status = status,
+                sortBy = sortBy,
+                limit = limit,
+                offset = offset
+            )
+            val count = downloadDao.countSearchResults(query, favoritesOnly, status)
+            val downloads = entities.map { it.toDomain() }
+            Result.success(Pair(downloads, count))
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to search downloads")
+            Result.failure(e)
+        }
+    }
 }

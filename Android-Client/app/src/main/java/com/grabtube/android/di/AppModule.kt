@@ -44,7 +44,7 @@ object AppModule {
             GrabTubeDatabase::class.java,
             GrabTubeDatabase.DATABASE_NAME
         )
-            .fallbackToDestructiveMigration()
+            .addMigrations(GrabTubeDatabase.MIGRATION_1_2)
             .build()
     }
 

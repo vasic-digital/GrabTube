@@ -27,6 +27,7 @@ class Download extends Equatable {
     this.downloadedSize,
     this.error,
     this.timestamp,
+    this.isFavorite = false,
     // Rich metadata fields
     this.description,
     this.duration,
@@ -55,6 +56,7 @@ class Download extends Equatable {
   final int? downloadedSize;
   final String? error;
   final DateTime? timestamp;
+  final bool isFavorite;
 
   // Rich metadata fields
   final String? description;
@@ -85,6 +87,7 @@ class Download extends Equatable {
     int? downloadedSize,
     String? error,
     DateTime? timestamp,
+    bool? isFavorite,
     String? description,
     int? duration,
     String? uploader,
@@ -112,6 +115,7 @@ class Download extends Equatable {
       downloadedSize: downloadedSize ?? this.downloadedSize,
       error: error ?? this.error,
       timestamp: timestamp ?? this.timestamp,
+      isFavorite: isFavorite ?? this.isFavorite,
       description: description ?? this.description,
       duration: duration ?? this.duration,
       uploader: uploader ?? this.uploader,
@@ -160,6 +164,7 @@ class Download extends Equatable {
         downloadedSize,
         error,
         timestamp,
+        isFavorite,
         description,
         duration,
         uploader,

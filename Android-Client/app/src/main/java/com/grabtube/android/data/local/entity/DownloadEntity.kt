@@ -27,7 +27,8 @@ data class DownloadEntity(
     val startedAt: Long?,
     val completedAt: Long?,
     val outputPath: String?,
-    val autoStart: Boolean
+    val autoStart: Boolean,
+    val isFavorite: Boolean = false
 )
 
 fun DownloadEntity.toDomain(): Download {
@@ -50,7 +51,8 @@ fun DownloadEntity.toDomain(): Download {
         startedAt = startedAt?.let { Instant.ofEpochSecond(it) },
         completedAt = completedAt?.let { Instant.ofEpochSecond(it) },
         outputPath = outputPath,
-        autoStart = autoStart
+        autoStart = autoStart,
+        isFavorite = isFavorite
     )
 }
 
@@ -74,6 +76,7 @@ fun Download.toEntity(): DownloadEntity {
         startedAt = startedAt?.epochSecond,
         completedAt = completedAt?.epochSecond,
         outputPath = outputPath,
-        autoStart = autoStart
+        autoStart = autoStart,
+        isFavorite = isFavorite
     )
 }

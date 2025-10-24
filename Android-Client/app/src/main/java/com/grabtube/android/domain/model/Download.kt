@@ -24,7 +24,8 @@ data class Download(
     val startedAt: Instant? = null,
     val completedAt: Instant? = null,
     val outputPath: String? = null,
-    val autoStart: Boolean = true
+    val autoStart: Boolean = true,
+    val isFavorite: Boolean = false
 )
 
 enum class DownloadStatus {

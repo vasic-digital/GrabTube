@@ -6,14 +6,16 @@ import '../../core/utils/logger.dart';
 import '../../domain/entities/download.dart';
 import '../../domain/entities/video_info.dart';
 import '../../domain/repositories/download_repository.dart';
+import '../../domain/repositories/search_repository.dart';
 import '../models/download_model.dart';
 
 @Singleton(as: DownloadRepository)
 class DownloadRepositoryImpl implements DownloadRepository {
-  DownloadRepositoryImpl(this._apiClient, this._socketClient);
+  DownloadRepositoryImpl(this._apiClient, this._socketClient, this._searchRepository);
 
   final ApiClient _apiClient;
   final SocketClient _socketClient;
+  final SearchRepository _searchRepository;
 
   @override
   Future<Download> addDownload({
@@ -240,4 +242,25 @@ class DownloadRepositoryImpl implements DownloadRepository {
 
   @override
   Stream<bool> get connectionStatus => _socketClient.connectionStatus;
+
+  @override
+  Future<void> toggleFavorite(String downloadId) async {
+    try {
+      AppLogger.info('Toggling favorite status for download: $downloadId');
+      await _searchRepository.toggleFavorite(downloadId);
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to toggle favorite', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> isFavorite(String downloadId) async {
+    try {
+      return await _searchRepository.isFavorite(downloadId);
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to check favorite status', e, stackTrace);
+      return false;
+    }
+  }
 }

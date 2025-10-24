@@ -73,4 +73,26 @@ interface DownloadRepository {
      * Sync downloads with server
      */
     suspend fun syncWithServer(): Result<Unit>
+
+    /**
+     * Toggle favorite status of a download
+     */
+    suspend fun toggleFavorite(id: String): Result<Unit>
+
+    /**
+     * Observe favorite downloads
+     */
+    fun observeFavorites(): Flow<List<Download>>
+
+    /**
+     * Search downloads with filters
+     */
+    suspend fun searchDownloads(
+        query: String? = null,
+        favoritesOnly: Boolean = false,
+        status: String? = null,
+        sortBy: String = "date",
+        limit: Int = 20,
+        offset: Int = 0
+    ): Result<Pair<List<Download>, Int>>
 }
