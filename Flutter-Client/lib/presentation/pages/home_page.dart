@@ -9,6 +9,7 @@ import '../widgets/download_list_item.dart';
 import '../widgets/add_download_dialog.dart';
 import '../widgets/empty_state_widget.dart';
 import 'history_page.dart';
+import 'jdownloader_dashboard_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -45,6 +46,21 @@ class _HomePageState extends State<HomePage>
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.cloud_download),
+            tooltip: 'My JDownloader',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider.value(
+                    value: context.read<JDownloaderBloc>(),
+                    child: const JDownloaderDashboardPage(),
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.history),
             tooltip: 'History',

@@ -10,7 +10,7 @@ part 'api_client.g.dart';
 @singleton
 abstract class ApiClient {
   @factoryMethod
-  factory ApiClient(Dio dio) = _ApiClient;
+  factory ApiClient(@Named('main') Dio dio) = _ApiClient;
 
   /// Add a new download to the queue
   @POST('/add')

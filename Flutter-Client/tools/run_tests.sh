@@ -49,6 +49,15 @@ flutter test test/integration || {
 
 echo -e "\n${GREEN}✅ Integration tests passed${NC}"
 
+# Run e2e tests
+echo -e "\n${YELLOW}Running e2e tests...${NC}"
+flutter test test/e2e --flavor development || {
+    echo -e "${RED}❌ E2E tests failed${NC}"
+    exit 1
+}
+
+echo -e "\n${GREEN}✅ E2E tests passed${NC}"
+
 # Generate coverage report
 echo -e "\n${YELLOW}Generating coverage report...${NC}"
 if command -v lcov &> /dev/null; then

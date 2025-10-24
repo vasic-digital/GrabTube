@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/di/injection.dart';
 import '../core/constants/app_constants.dart';
 import 'blocs/download/download_bloc.dart';
+import 'blocs/jdownloader/jdownloader_bloc.dart';
 import 'pages/home_page.dart';
 
 class GrabTubeApp extends StatelessWidget {
@@ -15,6 +16,9 @@ class GrabTubeApp extends StatelessWidget {
       providers: [
         BlocProvider<DownloadBloc>(
           create: (_) => getIt<DownloadBloc>(),
+        ),
+        BlocProvider<JDownloaderBloc>(
+          create: (_) => getIt<JDownloaderBloc>(),
         ),
       ],
       child: MaterialApp(
