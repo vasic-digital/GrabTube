@@ -402,7 +402,7 @@ def main():
     print("🧪 GrabTube AI Test Validation System")
     print(f"📁 Project: {project_root}\n")
 
-    validator = AITestValidator(project_root)
+    validator = AITestValidator(str(project_root))
 
     # Run all tests
     validator.run_all_tests()

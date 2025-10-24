@@ -1,15 +1,42 @@
-name: CI/CD Pipeline
+name: Manual CI/CD Pipeline
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - debug
+        - release
+      platforms:
+        description: 'Platforms to build (comma-separated)'
+        required: true
+        default: 'android,ios,linux,windows,macos,web'
+        type: string
+      run_tests:
+        description: 'Run test suites'
+        required: true
+        default: true
+        type: boolean
+      generate_coverage:
+        description: 'Generate coverage reports'
+        required: true
+        default: true
+        type: boolean
+      run_analysis:
+        description: 'Run code analysis'
+        required: true
+        default: true
+        type: boolean
 
 jobs:
   test:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    if: inputs.run_tests == true
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -30,39 +57,41 @@ jobs:
       - name: Analyze code
         run: flutter analyze
 
-      - name: Run unit tests
-        run: flutter test test/unit --coverage
+       - name: Run unit tests
+         run: flutter test test/unit ${{ inputs.generate_coverage == true && '--coverage' || '' }}
 
-      - name: Run widget tests
-        run: flutter test test/widget
+       - name: Run widget tests
+         run: flutter test test/widget
 
-      - name: Run integration tests
-        run: flutter test test/integration
+       - name: Run integration tests
+         run: flutter test test/integration
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: coverage/lcov.info
-          flags: unittests
-          name: codecov-flutter
+       - name: Upload coverage to Codecov
+         if: inputs.generate_coverage == true
+         uses: codecov/codecov-action@v3
+         with:
+           file: coverage/lcov.info
+           flags: unittests
+           name: codecov-flutter
 
-      - name: Generate coverage report
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get install -y lcov
-          genhtml coverage/lcov.info -o coverage/html
+       - name: Generate coverage report
+         if: matrix.os == 'ubuntu-latest' && inputs.generate_coverage == true
+         run: |
+           sudo apt-get install -y lcov
+           genhtml coverage/lcov.info -o coverage/html
 
-      - name: Upload coverage HTML
-        if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage/html
+       - name: Upload coverage HTML
+         if: matrix.os == 'ubuntu-latest' && inputs.generate_coverage == true
+         uses: actions/upload-artifact@v3
+         with:
+           name: coverage-report
+           path: coverage/html
 
   build-android:
     name: Build Android
     runs-on: ubuntu-latest
     needs: test
+    if: contains(inputs.platforms, 'android')
 
     steps:
       - name: Checkout code
@@ -83,11 +112,11 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build APK
-        run: flutter build apk --release
+       - name: Build APK
+         run: flutter build apk --${{ inputs.build_type }}
 
-      - name: Build App Bundle
-        run: flutter build appbundle --release
+       - name: Build App Bundle
+         run: flutter build appbundle --${{ inputs.build_type }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
@@ -105,6 +134,7 @@ jobs:
     name: Build iOS
     runs-on: macos-latest
     needs: test
+    if: contains(inputs.platforms, 'ios')
 
     steps:
       - name: Checkout code
@@ -126,6 +156,7 @@ jobs:
     name: Build Linux
     runs-on: ubuntu-latest
     needs: test
+    if: contains(inputs.platforms, 'linux')
 
     steps:
       - name: Checkout code
@@ -158,6 +189,7 @@ jobs:
     name: Build Windows
     runs-on: windows-latest
     needs: test
+    if: contains(inputs.platforms, 'windows')
 
     steps:
       - name: Checkout code
@@ -185,6 +217,7 @@ jobs:
     name: Build macOS
     runs-on: macos-latest
     needs: test
+    if: contains(inputs.platforms, 'macos')
 
     steps:
       - name: Checkout code
@@ -202,8 +235,36 @@ jobs:
       - name: Build macOS
         run: flutter build macos --release
 
-      - name: Upload macOS build
-        uses: actions/upload-artifact@v3
-        with:
-          name: macos-build
-          path: build/macos/Build/Products/Release/
+       - name: Upload macOS build
+         uses: actions/upload-artifact@v3
+         with:
+           name: macos-build
+           path: build/macos/Build/Products/Release/
+
+  build-web:
+    name: Build Web
+    runs-on: ubuntu-latest
+    needs: test
+    if: contains(inputs.platforms, 'web')
+
+    steps:
+       - name: Checkout code
+         uses: actions/checkout@v4
+
+       - name: Setup Flutter
+         uses: subosito/flutter-action@v2
+         with:
+           flutter-version: '3.24.0'
+           channel: 'stable'
+
+       - name: Get dependencies
+         run: flutter pub get
+
+       - name: Build Web
+         run: flutter build web --${{ inputs.build_type }}
+
+       - name: Upload Web build
+         uses: actions/upload-artifact@v3
+         with:
+           name: web-build
+           path: build/web
