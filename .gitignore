@@ -1,12 +1,43 @@
-# Flutter
-.dart_tool/
-.packages
-.pub-cache/
-.pub/
-build/
-flutter_*.tar.xz
+# =============================================================================
+# GrabTube Git Ignore File
+# =============================================================================
+# This file ensures all SDKs and build artifacts are excluded from version control
+# Use install-dependencies.sh to set up all required dependencies
+# =============================================================================
+
+# =============================================================================
+# Development Tools & SDKs (All excluded - use install script)
+# =============================================================================
+
+# Flutter SDK (all versions)
 flutter/
+flutter_*.tar.xz
 .flutter/
+
+# Android SDK & Tools
+android-sdk/
+android-studio/
+commandlinetools-linux-*.zip
+*.tar.gz
+*.zip
+
+# Java Development Kit
+jdk/
+jre/
+*.jdk
+*.jre
+
+# Gradle
+.gradle/
+gradle/
+gradle-wrapper.jar
+
+# =============================================================================
+# Build Artifacts (All excluded)
+# =============================================================================
+
+# Flutter builds
+build/
 android/app/build/
 android/build/
 ios/Flutter/App.framework
@@ -16,79 +47,40 @@ linux/build/
 macos/build/
 windows/build/
 web/build/
+
+# Coverage and test reports
 coverage/
-*.jks
-*.keystore
+test-results/
+test-reports/
+allure-results/
+allure-report/
+cypress/videos/
+cypress/screenshots/
+.nyc_output
+coverage-reports/
 
-# Android SDK and Emulator
-android-sdk/
-*.tar.gz
-*.zip
-commandlinetools-linux-*_latest.zip
-android-studio/
-.gradle/
-local.properties
-*.log
-*.tmp
-*.swp
-*.swo
-*~
+# =============================================================================
+# Dependencies & Package Managers
+# =============================================================================
 
-# Android Studio
-.idea/
-*.iml
-*.ipr
-*.iws
+# Dart/Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
 
-# VS Code
-.vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
-
-# Linux
-*~
-.fuse_hidden*
-.directory
-.Trash-*
-.nfs*
+# Node.js
+node_modules/
+.npm/
+.yarn/
+.pnpm/
+.yarn-integrity
+package-lock.json
+yarn.lock
 
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
 .Python
 build/
@@ -121,134 +113,31 @@ conda/
 .coverage
 htmlcov/
 .tox/
-.cache
 nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
 
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.npm
-.yarn-integrity
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.parcel-cache
-
-# Testing
-test-results/
-test-reports/
-allure-results/
-allure-report/
-cypress/videos/
-cypress/screenshots/
-.nyc_output
-coverage-reports/
-test_validation_report.json
-
-# Temporary files
-*.tmp
-*.temp
-*.bak
-*.backup
-*.old
-*.orig
-*.rej
-*.swp
-*.swo
-*~
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-lib-cov/
-
-# Grunt intermediate storage
-.grunt/
-
-# Bower dependency directory
-bower_components/
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons
-build/Release/
-
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
-.npm
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-
-# parcel-bundler cache
-.cache
-.parcel-cache
-
-# next.js build output
-.next
-
-# nuxt.js build output
-.nuxt
-
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
+# =============================================================================
+# IDE & Editor Files
+# =============================================================================
 
 # JetBrains IDEs
 .idea/
-*.iws
 *.iml
 *.ipr
+*.iws
 
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Android Studio
+local.properties
 
 # Vim
 *.swp
@@ -265,14 +154,111 @@ auto-save-list
 tramp
 .\#*
 
-# OS generated files
+# =============================================================================
+# OS Generated Files
+# =============================================================================
+
+# macOS
 .DS_Store
 .DS_Store?
 ._*
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
 .Spotlight-V100
+.TemporaryItems
 .Trashes
-ehthumbs.db
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# Security & Configuration
+# =============================================================================
+
+# Certificates and Keys
+*.jks
+*.keystore
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Environment and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+secrets.json
+config/secrets.json
+google-services.json
+GoogleService-Info.plist
+.firebase/
+.aws/
+.azure/
+.gcp/
+.env.heroku
+.vercel/
+.netlify/
+.surge/
+.sentryclirc
+stripe.env
+
+# =============================================================================
+# Logs & Temporary Files
+# =============================================================================
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.swp
+*.swo
+
+# =============================================================================
+# Platform Specific
+# =============================================================================
 
 # Android
 *.apk
@@ -280,14 +266,10 @@ Thumbs.db
 *.dex
 bin/
 gen/
-.gradle/
-local.properties
 proguard/
 *.log
 .navigation/
 captures/
-*.jks
-*.keystore
 
 # iOS
 *.ipa
@@ -301,6 +283,70 @@ captures/
 *.xccheckout
 *.xcscmblueprint
 
+# =============================================================================
+# Package Managers Lock Files (Keep these for consistency)
+# =============================================================================
+
+# Keep lock files for dependency consistency
+!package-lock.json
+!yarn.lock
+!Pipfile.lock
+!poetry.lock
+!.gradle/gradle-wrapper.properties
+
+# =============================================================================
+# Development Tools Configuration (Keep essential configs)
+# =============================================================================
+
+# Keep essential VS Code configs
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Keep essential Gradle wrapper
+!.gradle/gradle-wrapper.properties
+!gradle/wrapper/gradle-wrapper.jar
+
+# =============================================================================
+# Documentation & Media (Exclude large binaries)
+# =============================================================================
+
+# Large media files
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.wma
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.svg
+*.ico
+*.webp
+
+# Large data files
+*.csv
+*.json
+*.xml
+*.yaml
+*.yml
+
+# =============================================================================
+# CI/CD & Build Tools
+# =============================================================================
+
 # Fastlane
 fastlane/report.xml
 fastlane/Preview.html
@@ -308,282 +354,15 @@ fastlane/screenshots
 fastlane/test_output
 fastlane/readme.md
 
-# CocoaPods
-Pods/
-Podfile.lock
-*.xcworkspace
-
-# Carthage
-Carthage/Build/
-
-# Swift Package Manager
-.build/
-Packages/
-Package.pipfile
-Package.resolved
-
-# Xcode
-*.xcodeproj/*
-!*.xcodeproj/project.pbxproj
-!*.xcodeproj/xcshareddata/
-!*.xcodeproj/project.xcworkspace/
-*.xcworkspace/*
-!*.xcworkspace/contents.xcworkspacedata
-/*.gcno
+# Build tools
+.scannerwork/
+cmake-build-*/
+*.gcno
 **/xcshareddata/WorkspaceSettings.xcsettings
 
-# Firebase
-google-services.json
-GoogleService-Info.plist
-
-# Crashlytics
-crashlytics-build.properties
-
-# Unity
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-Assets/AssetStoreTools*
-
-# Unreal Engine
-Binaries/
-Plugins/*/Intermediate/
-Content/Saved/
-
-# Godot
-.import/
-export_presets.cfg
-
-# Construct 3
-*.capx.auto-saved
-
-# GameMaker Studio
-*.yyz
-
-# Visual Studio
-.vs/
-*.user
-*.aps
-*.pch
-*.vspscc
-*_i.c
-*_p.c
-*.ncb
-*.suo
-*.tlb
-*.tlh
-*.tmp
-*.tmp_proj
-*.log
-*.vspscc
-*.vssscc
-.builds
-*.pidb
-*.svclog
-*.scc
-
-# Rider
-.idea/
-
-# MonoDevelop
-*.userprefs
-
-# Visual Studio Code
-.vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# Rider
-.idea/
-
-# Fleet
-.fleet/
-
-# WebStorm
-.idea/
-
-# Android Studio
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# Eclipse
-.metadata
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.settings/
-.loadpath
-.recommenders
-
-# NetBeans
-nbproject/private/
-build/
-nbbuild/
-dist/
-nbdist/
-.nb-gradle/
-
-# IntelliJ IDEA
-.idea/
-*.iws
-*.iml
-*.ipr
-
-# SonarQube
-.scannerwork/
-
-# CMake
-cmake-build-*/
-
-# CLion
-.idea/
-
-# Qt Creator
-*.pro.user
-*.pro.user.*
-*.qbs.user
-*.qbs.user.*
-*.qmlproject.user
-*.qmlproject.user.*
-
-# Qt
-*.pro.user
-*.pro.user.*
-*.qbs.user
-*.qbs.user.*
-*.qmlproject.user
-*.qmlproject.user.*
-
-# Temporary folders
-tmp/
-temp/
-
-# Cache directories
-.cache/
-.npm/
-.yarn/
-.pnpm/
-
-# Lock files (keep these in version control for consistency)
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
-# Pipfile.lock
-# poetry.lock
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Database files
-*.db
-*.sqlite
-*.sqlite3
-
-# Backup files
-*.backup
-*.bak
-*.old
-*.orig
-
-# Swap files
-*.swp
-*.swo
-*~
-
-# Patch files
-*.patch
-*.diff
-
-# Archive files
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-
-# Executable files
-*.exe
-*.msi
-*.deb
-*.rpm
-
-# Certificate files
-*.pem
-*.key
-*.crt
-*.cer
-*.p12
-*.pfx
-
-# API keys and secrets
-secrets.json
-config/secrets.json
-.env.local
-.env.*.local
-
-# Firebase
-.firebase/
-firebase-debug.log
-firestore-debug.log
-
-# Google Services
-google-services.json
-GoogleService-Info.plist
-
-# Sentry
-.sentryclirc
-
-# Stripe
-stripe.env
-
-# AWS
-.aws/
-*.pem
-
-# Azure
-.azure/
-
-# GCP
-.gcp/
-
-# Heroku
-.env.heroku
-
-# Vercel
-.vercel
-
-# Netlify
-.netlify/
-
-# Surge
-.surge/
-
-# Docker
-.dockerignore
-
-# Kubernetes
-*.yaml
-*.yml
-
-# Helm
-charts/
+# =============================================================================
+# Infrastructure as Code
+# =============================================================================
 
 # Terraform
 .terraform/
@@ -593,182 +372,60 @@ charts/
 # Ansible
 *.retry
 
-# Vagrant
-.vagrant/
-
-# Packer
-*.pkrvars.hcl
-
-# Chef
-Berksfile.lock
-cookbooks/
-
-# Puppet
-modules/
-
-# Salt
-salt/
-
-# Jenkins
-Jenkinsfile
-
-# Travis CI
-.travis.yml
-
-# CircleCI
-.circleci/
-
-# GitHub Actions
-.github/workflows/*.yml
-.github/workflows/*.yaml
-
-# GitLab CI
-.gitlab-ci.yml
-
-# Azure Pipelines
-azure-pipelines.yml
-
-# Bitbucket Pipelines
-bitbucket-pipelines.yml
-
-# Buildkite
-.buildkite/
-
-# TeamCity
-.teamcity/
-
-# AppVeyor
-appveyor.yml
-
-# Codeship
-codeship-services.yml
-codeship-steps.yml
-
-# Drone
-.drone.yml
-
-# Semaphore
-.semaphore/
-
-# Buildbot
-master.cfg
-
-# GoCD
-*.gocd.yml
-
-# Concourse
+# Kubernetes
+*.yaml
 *.yml
 
-# Spinnaker
-spinnaker/
-
-# ArgoCD
-argocd/
-
-# Flux
-flux/
-
-# Tekton
-tekton/
-
-# Jenkins X
-jenkins-x.yml
-
-# Skaffold
-skaffold.yaml
-
-# Kustomize
-kustomization.yaml
-
 # Helm
-Chart.yaml
-values.yaml
+charts/
 
-# Docker Compose
-docker-compose.override.yml
+# =============================================================================
+# Testing
+# =============================================================================
 
-# Docker
-Dockerfile.*
-docker-compose.*.yml
-
-# Vagrant
-Vagrantfile
-
-# Packer
-packer.json
-
-# Terraform
-terraform.tfvars
-
-# Ansible
-inventory/
-group_vars/
-host_vars/
-
-# Molecule
+# Test frameworks
 .molecule/
-
-# Testinfra
 .tox/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
 
-# Serverspec
-spec/
+# Test artifacts
+test_validation_report.json
 
-# Goss
-goss.yaml
+# =============================================================================
+# Archives & Executables
+# =============================================================================
 
-# Kitchen
-.kitchen/
+# Archives
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
 
-# Inspec
-inspec/
+# Executables
+*.exe
+*.msi
+*.deb
+*.rpm
 
-# ChefSpec
-spec/
+# =============================================================================
+# Documentation
+# =============================================================================
 
-# RSpec
-spec/
-
-# Cucumber
-features/
-
-# Behat
-features/
-
-# PHPUnit
-phpunit.xml
-
-# Jest
-coverage/
-
-# Mocha
-coverage/
-
-# Karma
-coverage/
-
-# Jasmine
-spec/
-
-# Cypress
-cypress/videos/
-cypress/screenshots/
-
-# Playwright
-test-results/
-playwright-report/
-
-# Selenium
-selenium-debug.log
-
-# Appium
-appium.log
-
-# Detox
-artifacts/
-
-# Maestro
-*.maestro
+# Docs
+*.pdf
+*.doc
+*.docx
+*.xls
+*.xlsx
+*.ppt
+*.pptx
 
 # Flutter
 flutter_*.tar.xz

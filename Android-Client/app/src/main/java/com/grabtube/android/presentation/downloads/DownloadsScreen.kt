@@ -12,23 +12,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.grabtube.android.presentation.downloads.components.AddDownloadDialog
 import com.grabtube.android.presentation.downloads.components.DownloadItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloadsScreen(
+    navController: NavController,
     onNavigateToSettings: () -> Unit,
+    onNavigateToQRScanner: () -> Unit,
     sharedUrl: String? = null,
     viewModel: DownloadsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val downloads by viewModel.downloads.collectAsStateWithLifecycle()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    // Auto-fill shared URL if present
+    // Handle shared URL and scanned URL
     LaunchedEffect(sharedUrl) {
         if (!sharedUrl.isNullOrBlank()) {
-            viewModel.onEvent(DownloadsEvent.ShowAddDialog)
+            viewModel.onEvent(DownloadsEvent.AddDownload(sharedUrl))
+        }
+    }
+
+    // Handle scanned URL from QR scanner
+    LaunchedEffect(navBackStackEntry) {
+        val scannedUrl = navBackStackEntry?.savedStateHandle?.get<String>("scannedUrl")
+        if (!scannedUrl.isNullOrBlank()) {
+            viewModel.onEvent(DownloadsEvent.AddDownload(scannedUrl))
+            navBackStackEntry?.savedStateHandle?.remove<String>("scannedUrl")
         }
     }
 
@@ -37,6 +51,9 @@ fun DownloadsScreen(
             TopAppBar(
                 title = { Text("GrabTube") },
                 actions = {
+                    IconButton(onClick = onNavigateToQRScanner) {
+                        Icon(Icons.Default.QrCodeScanner, contentDescription = "Scan QR Code")
+                    }
                     IconButton(onClick = { viewModel.onEvent(DownloadsEvent.ClearCompleted) }) {
                         Icon(Icons.Default.Delete, contentDescription = "Clear Completed")
                     }

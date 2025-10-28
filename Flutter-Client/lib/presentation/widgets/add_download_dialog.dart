@@ -6,7 +6,9 @@ import '../blocs/download/download_bloc.dart';
 import '../blocs/download/download_event.dart';
 
 class AddDownloadDialog extends StatefulWidget {
-  const AddDownloadDialog({super.key});
+  final String? initialUrl;
+
+  const AddDownloadDialog({super.key, this.initialUrl});
 
   @override
   State<AddDownloadDialog> createState() => _AddDownloadDialogState();
@@ -14,10 +16,16 @@ class AddDownloadDialog extends StatefulWidget {
 
 class _AddDownloadDialogState extends State<AddDownloadDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _urlController = TextEditingController();
+  late final TextEditingController _urlController;
   String _selectedQuality = AppConstants.defaultQuality;
   String _selectedFormat = AppConstants.defaultFormat;
   bool _autoStart = AppConstants.defaultAutoStart;
+
+  @override
+  void initState() {
+    super.initState();
+    _urlController = TextEditingController(text: widget.initialUrl);
+  }
 
   @override
   void dispose() {

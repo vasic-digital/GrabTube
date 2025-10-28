@@ -53,6 +53,11 @@ retrofit-kotlinx-serialization-converter = "1.0.0"
 # Work Manager
 work = "2.10.0"
 
+# QR Code Scanning
+mlkit-barcode-scanning = "17.3.0"
+camerax = "1.3.4"
+camera-view = "1.3.4"
+
 # Testing
 junit = "4.13.2"
 androidx-test-ext-junit = "1.2.1"
@@ -126,6 +131,13 @@ retrofit-kotlinx-serialization-converter = { group = "com.jakewharton.retrofit",
 
 # Work Manager
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
+
+# QR Code Scanning
+mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkit-barcode-scanning" }
+camerax-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera-view" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

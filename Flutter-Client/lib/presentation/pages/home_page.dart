@@ -11,6 +11,7 @@ import '../blocs/search/search_bloc.dart';
 import '../widgets/download_list_item.dart';
 import '../widgets/add_download_dialog.dart';
 import '../widgets/empty_state_widget.dart';
+import '../widgets/adaptive_qr_scanner.dart';
 import 'history_page.dart';
 import 'search_page.dart';
 import 'jdownloader_dashboard_page.dart';
@@ -225,10 +226,25 @@ class _HomePageState extends State<HomePage>
           );
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddDownloadDialog(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Download'),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () => _showAddDownloadDialog(context),
+            icon: const Icon(Icons.add),
+            label: const Text('Add Download'),
+            heroTag: "addDownload",
+          ),
+          const SizedBox(width: 16),
+          FloatingActionButton.extended(
+            onPressed: () => _showQRScanner(context),
+            icon: const Icon(Icons.qr_code_scanner),
+            label: const Text('Scan QR'),
+            backgroundColor: const Color(0xFFE74C3C),
+            foregroundColor: Colors.white,
+            heroTag: "scanQR",
+          ),
+        ],
       ),
     );
   }
@@ -313,6 +329,29 @@ class _HomePageState extends State<HomePage>
       builder: (dialogContext) => BlocProvider.value(
         value: context.read<DownloadBloc>(),
         child: const AddDownloadDialog(),
+      ),
+    );
+  }
+
+  void _showQRScanner(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AdaptiveQRScanner(
+          onUrlScanned: (url) {
+            Navigator.of(context).pop();
+            _showAddDownloadDialogWithUrl(context, url);
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showAddDownloadDialogWithUrl(BuildContext context, String url) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<DownloadBloc>(),
+        child: AddDownloadDialog(initialUrl: url),
       ),
     );
   }

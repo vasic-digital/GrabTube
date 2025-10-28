@@ -56,14 +56,23 @@ All clients communicate with the powerful **yt-dlp** backend for downloading fro
 - ✅ Real-time progress tracking
 - ✅ Download queue management
 - ✅ Persistent download history
+- ✅ **QR Code Scanning** - Scan QR codes to instantly download videos
 
 ### Flutter Client Exclusive
 - ✅ **Native performance** on all platforms
 - ✅ **Material Design 3** with adaptive theming
 - ✅ **Background downloads** with notifications
 - ✅ **Offline queue** management
+- ✅ **QR Code Scanning** with camera integration
 - ✅ **>80% test coverage** with AI validation
 - ✅ **CI/CD pipeline** for automated testing
+
+### ShareConnect Features
+- 🔗 **Universal Link Sharing** - Share download links across all devices
+- 📱 **Cross-Platform Sync** - Synchronized download queues and history
+- 🌐 **Web Integration** - Browser extensions and bookmarklets
+- 📲 **Mobile Sharing** - Native sharing integration on mobile devices
+- 🔄 **Real-time Updates** - Live synchronization across all clients
 
 ---
 
@@ -131,6 +140,7 @@ flutter build macos         # macOS
 - [🏗️ Architecture Guide](Flutter-Client/docs/ARCHITECTURE.md) - Clean architecture, BLoC pattern
 - [🔌 API Documentation](Flutter-Client/docs/API.md) - Backend API reference
 - [👤 User Guide](Flutter-Client/docs/USER_GUIDE.md) - Complete user manual
+- [📱 QR Scanning Guide](QR_SCANNING_FEATURE.md) - QR code scanning implementation
 - [📊 Implementation Summary](IMPLEMENTATION_SUMMARY.md) - Project completion report
 
 ### Web Client Documentation
