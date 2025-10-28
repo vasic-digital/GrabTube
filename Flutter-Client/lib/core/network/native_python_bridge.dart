@@ -8,7 +8,6 @@ import '../utils/logger.dart';
 
 /// Platform-specific bridge for Python integration
 /// This provides different implementations for different platforms
-@singleton
 class NativePythonBridge {
   /// Check if Python is available on the current platform
   Future<bool> isPythonAvailable() async {

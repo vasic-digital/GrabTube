@@ -26,6 +26,7 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
     on<DownloadCanceled>(_onDownloadCanceled);
     on<LoadHistory>(_onLoadHistory);
     on<RedownloadFromHistory>(_onRedownloadFromHistory);
+    on<ToggleFavorite>(_onToggleFavorite);
 
     _initializeSocketListeners();
   }
@@ -339,6 +340,27 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
         error: e,
       ));
     }
+  }
+
+  Future<void> _onToggleFavorite(
+    ToggleFavorite event,
+    Emitter<DownloadState> emit,
+  ) async {
+    try {
+      await _repository.toggleFavorite(event.downloadId);
+      // Reload downloads to reflect the change
+      add(const LoadDownloads());
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to toggle favorite', e, stackTrace);
+      emit(DownloadError(
+        message: 'Failed to toggle favorite: ${e.toString()}',
+        error: e,
+      ));
+    }
+  }
+
+  Future<void> toggleFavorite(String downloadId) async {
+    add(ToggleFavorite(downloadId: downloadId));
   }
 
   @override

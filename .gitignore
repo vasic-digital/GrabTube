@@ -14,6 +14,9 @@ flutter/
 flutter_*.tar.xz
 .flutter/
 
+# uv package manager
+.uv/
+
 # Android SDK & Tools
 android-sdk/
 android-studio/

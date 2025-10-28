@@ -7,6 +7,7 @@ import '../../core/di/injection.dart';
 import '../blocs/download/download_bloc.dart';
 import '../blocs/download/download_event.dart';
 import '../blocs/download/download_state.dart';
+import '../blocs/jdownloader/jdownloader_bloc.dart';
 import '../blocs/search/search_bloc.dart';
 import '../widgets/download_list_item.dart';
 import '../widgets/add_download_dialog.dart';

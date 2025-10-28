@@ -176,7 +176,7 @@ build_flutter_mobile() {
 
     # Get dependencies
     print_status "Getting Flutter dependencies..."
-    if ! flutter pub get --suppress-analytics; then
+    if ! flutter pub get; then
         print_error "Failed to get Flutter dependencies"
         cd ..
         return 1
@@ -184,7 +184,7 @@ build_flutter_mobile() {
 
     # Run code generation
     print_status "Running code generation..."
-    if ! flutter pub run build_runner build --delete-conflicting-outputs --suppress-analytics; then
+    if ! flutter pub run build_runner build --delete-conflicting-outputs; then
         print_error "Code generation failed"
         cd ..
         return 1
@@ -192,7 +192,7 @@ build_flutter_mobile() {
 
     # Analyze code
     print_status "Analyzing code..."
-    if ! flutter analyze --suppress-analytics; then
+    if ! flutter analyze; then
         print_error "Code analysis failed"
         cd ..
         return 1
@@ -200,7 +200,7 @@ build_flutter_mobile() {
 
     # Build debug APK
     print_status "Building debug APK..."
-    if ! flutter build apk --debug --suppress-analytics; then
+    if ! flutter build apk --debug; then
         print_error "Debug APK build failed"
         cd ..
         return 1
@@ -208,7 +208,7 @@ build_flutter_mobile() {
 
     # Build release APK
     print_status "Building release APK..."
-    if ! flutter build apk --release --suppress-analytics; then
+    if ! flutter build apk --release; then
         print_error "Release APK build failed"
         cd ..
         return 1
@@ -216,7 +216,7 @@ build_flutter_mobile() {
 
     # Build web version
     print_status "Building web version..."
-    if ! flutter build web --release --suppress-analytics; then
+    if ! flutter build web --release; then
         print_error "Web build failed"
         cd ..
         return 1
@@ -247,7 +247,7 @@ build_flutter_web() {
 
     # Get dependencies
     print_status "Getting Flutter dependencies..."
-    if ! flutter pub get --suppress-analytics; then
+    if ! flutter pub get; then
         print_error "Failed to get Flutter dependencies"
         cd ../..
         return 1
@@ -255,7 +255,7 @@ build_flutter_web() {
 
     # Run code generation
     print_status "Running code generation..."
-    if ! flutter pub run build_runner build --delete-conflicting-outputs --suppress-analytics; then
+    if ! flutter pub run build_runner build --delete-conflicting-outputs; then
         print_error "Code generation failed"
         cd ../..
         return 1
@@ -263,7 +263,7 @@ build_flutter_web() {
 
     # Analyze code
     print_status "Analyzing code..."
-    if ! flutter analyze --suppress-analytics; then
+    if ! flutter analyze; then
         print_error "Code analysis failed"
         cd ../..
         return 1
@@ -271,7 +271,7 @@ build_flutter_web() {
 
     # Build web version
     print_status "Building web version..."
-    if ! flutter build web --release --suppress-analytics; then
+    if ! flutter build web --release; then
         print_error "Web build failed"
         cd ../..
         return 1

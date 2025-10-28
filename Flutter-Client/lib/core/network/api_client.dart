@@ -7,7 +7,6 @@ import '../../data/models/download_model.dart';
 part 'api_client.g.dart';
 
 @RestApi()
-@singleton
 abstract class ApiClient {
   @factoryMethod
   factory ApiClient(@Named('main') Dio dio) = _ApiClient;

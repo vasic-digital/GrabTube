@@ -518,7 +518,7 @@ void main() {
       );
 
       // Test different text scales
-      await tester.binding.platformDispatcher.textScaleFactorTestValue = 2.0;
+      tester.binding.platformDispatcher.textScaleFactor = 2.0;
 
       await tester.pumpWidget(
         MaterialApp(

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:patrol/patrol.dart';
@@ -130,7 +131,7 @@ void main() {
     expect(endTime.difference(startTime).inSeconds, lessThan(5));
 
     // Test search with special characters
-    await $.enterText(searchField, 'test@#$%^&*()');
+    await $.enterText(searchField, 'test@#\$%^&*()');
     await $.tap(find.byIcon(Icons.search));
     await $.pumpAndSettle();
 

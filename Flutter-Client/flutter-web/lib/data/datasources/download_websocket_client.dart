@@ -53,7 +53,7 @@ class DownloadWebSocketClient {
 
       _setupEventListeners();
     } catch (e) {
-      AppLogger.error('Error connecting to WebSocket', error: e);
+      AppLogger.error('Error connecting to WebSocket', e);
       _connectionController.add(false);
     }
   }
@@ -87,7 +87,7 @@ class DownloadWebSocketClient {
         final model = DownloadModel.fromJson(data as Map<String, dynamic>);
         _addedController.add(model);
       } catch (e) {
-        AppLogger.error('Error parsing added event', error: e);
+        AppLogger.error('Error parsing added event', e);
       }
     });
 
@@ -97,7 +97,7 @@ class DownloadWebSocketClient {
         final model = DownloadModel.fromJson(data as Map<String, dynamic>);
         _updateController.add(model);
       } catch (e) {
-        AppLogger.error('Error parsing updated event', error: e);
+        AppLogger.error('Error parsing updated event', e);
       }
     });
 
@@ -107,7 +107,7 @@ class DownloadWebSocketClient {
         final model = DownloadModel.fromJson(data as Map<String, dynamic>);
         _updateController.add(model);
       } catch (e) {
-        AppLogger.error('Error parsing completed event', error: e);
+        AppLogger.error('Error parsing completed event', e);
       }
     });
 
@@ -117,7 +117,7 @@ class DownloadWebSocketClient {
         final model = DownloadModel.fromJson(data as Map<String, dynamic>);
         _updateController.add(model);
       } catch (e) {
-        AppLogger.error('Error parsing canceled event', error: e);
+        AppLogger.error('Error parsing canceled event', e);
       }
     });
 
@@ -127,7 +127,7 @@ class DownloadWebSocketClient {
         final model = DownloadModel.fromJson(data as Map<String, dynamic>);
         _updateController.add(model);
       } catch (e) {
-        AppLogger.error('Error parsing error event', error: e);
+        AppLogger.error('Error parsing error event', e);
       }
     });
 
@@ -137,7 +137,7 @@ class DownloadWebSocketClient {
         final id = data as String;
         _deletedController.add(id);
       } catch (e) {
-        AppLogger.error('Error parsing deleted event', error: e);
+        AppLogger.error('Error parsing deleted event', e);
       }
     });
 

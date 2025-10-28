@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as path;
@@ -6,7 +7,6 @@ import 'package:path/path.dart' as path;
 import '../../core/utils/logger.dart';
 
 /// Client for managing the embedded Python service
-@singleton
 class PythonServiceClient {
   Process? _pythonProcess;
   bool _isRunning = false;
@@ -66,7 +66,7 @@ class PythonServiceClient {
       // Check if process is still running
       final exitCode = await _pythonProcess!.exitCode.timeout(
         const Duration(seconds: 1),
-        onTimeout: () => null,
+        onTimeout: () => -1,
       );
 
       if (exitCode != null) {
@@ -96,7 +96,9 @@ class PythonServiceClient {
       }
 
       _isRunning = false;
-      _statusController.add(false);
+      if (!_statusController.isClosed) {
+        _statusController.add(false);
+      }
       AppLogger.info('Embedded Python service stopped');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to stop Python service', e, stackTrace);

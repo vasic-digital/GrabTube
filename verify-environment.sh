@@ -3,7 +3,7 @@
 # GrabTube Environment Verification Script
 # Verifies all required dependencies and tools for building and testing all applications
 
-set -e
+
 
 # Colors for output
 GREEN='\033[0;32m'

@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/network/api_client.dart';
 import '../../core/network/socket_client.dart';
@@ -6,16 +7,17 @@ import '../../core/utils/logger.dart';
 import '../../domain/entities/download.dart';
 import '../../domain/entities/video_info.dart';
 import '../../domain/repositories/download_repository.dart';
-import '../../domain/repositories/search_repository.dart';
 import '../models/download_model.dart';
 
 @Singleton(as: DownloadRepository)
 class DownloadRepositoryImpl implements DownloadRepository {
-  DownloadRepositoryImpl(this._apiClient, this._socketClient, this._searchRepository);
+  DownloadRepositoryImpl(this._apiClient, this._socketClient, this._prefs);
 
   final ApiClient _apiClient;
   final SocketClient _socketClient;
-  final SearchRepository _searchRepository;
+  final SharedPreferences _prefs;
+
+  static const String _favoritesKey = 'favorite_download_ids';
 
   @override
   Future<Download> addDownload({
@@ -246,8 +248,12 @@ class DownloadRepositoryImpl implements DownloadRepository {
   @override
   Future<void> toggleFavorite(String downloadId) async {
     try {
-      AppLogger.info('Toggling favorite status for download: $downloadId');
-      await _searchRepository.toggleFavorite(downloadId);
+      final isFav = await isFavorite(downloadId);
+      if (isFav) {
+        await _removeFromFavorites(downloadId);
+      } else {
+        await _addToFavorites(downloadId);
+      }
     } catch (e, stackTrace) {
       AppLogger.error('Failed to toggle favorite', e, stackTrace);
       rethrow;
@@ -257,10 +263,44 @@ class DownloadRepositoryImpl implements DownloadRepository {
   @override
   Future<bool> isFavorite(String downloadId) async {
     try {
-      return await _searchRepository.isFavorite(downloadId);
+      final favoriteIds = await _getFavoriteIds();
+      return favoriteIds.contains(downloadId);
     } catch (e, stackTrace) {
       AppLogger.error('Failed to check favorite status', e, stackTrace);
       return false;
+    }
+  }
+
+  Future<List<String>> _getFavoriteIds() async {
+    try {
+      return _prefs.getStringList(_favoritesKey) ?? [];
+    } catch (e) {
+      AppLogger.error('Failed to get favorite IDs', e);
+      return [];
+    }
+  }
+
+  Future<void> _addToFavorites(String downloadId) async {
+    try {
+      final favoriteIds = await _getFavoriteIds();
+      if (!favoriteIds.contains(downloadId)) {
+        favoriteIds.add(downloadId);
+        await _prefs.setStringList(_favoritesKey, favoriteIds);
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to add to favorites', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> _removeFromFavorites(String downloadId) async {
+    try {
+      final favoriteIds = await _getFavoriteIds();
+      favoriteIds.remove(downloadId);
+      await _prefs.setStringList(_favoritesKey, favoriteIds);
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to remove from favorites', e, stackTrace);
+      rethrow;
     }
   }
 }

@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:injectable/injectable.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../constants/app_constants.dart';
 import '../utils/logger.dart';
@@ -19,7 +19,7 @@ enum SocketEvent {
   error,
 }
 
-@singleton
+@lazySingleton
 class SocketClient {
   SocketClient(this._prefs) {
     _initialize();

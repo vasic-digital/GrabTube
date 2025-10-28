@@ -30,7 +30,6 @@ void main() {
       // Verify QR scanning dependencies are present
       expect(pubspecContent, contains('mobile_scanner'), reason: 'mobile_scanner dependency should be present');
       expect(pubspecContent, contains('qr_flutter'), reason: 'qr_flutter dependency should be present');
-      expect(pubspecContent, contains('qr_code_scanner'), reason: 'qr_code_scanner dependency should be present');
 
       print('✓ QR scanner dependencies validated');
     });

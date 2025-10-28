@@ -136,3 +136,13 @@ class RedownloadFromHistory extends DownloadEvent {
   @override
   List<Object?> get props => [url, quality, format, folder, autoStart];
 }
+
+/// Toggle favorite status
+class ToggleFavorite extends DownloadEvent {
+  const ToggleFavorite({required this.downloadId});
+
+  final String downloadId;
+
+  @override
+  List<Object?> get props => [downloadId];
+}
