@@ -1,12 +1,13 @@
+import 'package:dartz/dartz.dart';
 import '../entities/qr_scan_result.dart';
 
 /// Repository interface for QR code scanning operations
-abstract class QrScannerRepository {
+abstract class QRScannerRepository {
   /// Scan QR code from camera
-  Future<QRScanResult> scanFromCamera();
+  Future<Either<String, QRScanResult>> scanQRCode();
 
   /// Scan QR code from image file
-  Future<QRScanResult> scanFromImage(String imagePath);
+  Future<Either<String, QRScanResult>> scanFromImage(String imagePath);
 
   /// Validate if scanned value is a valid download URL
   Future<bool> validateUrl(String url);
@@ -30,5 +31,5 @@ abstract class QrScannerRepository {
   Future<bool> hasCameraPermission();
 
   /// Request camera permission
-  Future<bool> requestCameraPermission();
+  Future<Either<String, void>> requestCameraPermission();
 }
