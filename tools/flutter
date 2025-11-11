@@ -1,0 +1,42 @@
+#!/bin/bash
+# =============================================================================
+# GrabTube - Flutter Wrapper Script
+# =============================================================================
+# This script wraps the local Flutter SDK installation, making it easy to use
+# without modifying PATH or sourcing environment files.
+#
+# Usage: ./tools/flutter [flutter-arguments]
+#
+# Examples:
+#   ./tools/flutter --version
+#   ./tools/flutter doctor
+#   ./tools/flutter pub get
+#   ./tools/flutter run
+# =============================================================================
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FLUTTER_SDK_DIR="${SCRIPT_DIR}/flutter-sdk"
+FLUTTER_BIN="${FLUTTER_SDK_DIR}/bin/flutter"
+
+# Color codes for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Check if Flutter SDK is installed
+if [[ ! -f "$FLUTTER_BIN" ]]; then
+    echo -e "${RED}[ERROR]${NC} Flutter SDK not found at: $FLUTTER_SDK_DIR"
+    echo ""
+    echo "Please run the setup script first:"
+    echo -e "  ${GREEN}./tools/setup-flutter.sh${NC}"
+    echo ""
+    exit 1
+fi
+
+# Export Flutter root
+export FLUTTER_ROOT="$FLUTTER_SDK_DIR"
+
+# Execute Flutter with all passed arguments
+exec "$FLUTTER_BIN" "$@"

@@ -13,6 +13,9 @@
 flutter/
 flutter_*.tar.xz
 .flutter/
+tools/flutter-sdk/
+tools/flutter-*.tar.xz
+.flutter-version
 
 # uv package manager
 .uv/
