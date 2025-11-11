@@ -5,6 +5,10 @@ import '../../domain/entities/search_result.dart';
 import '../blocs/search/search_bloc.dart';
 import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
+import '../widgets/download_list_item.dart';
+import '../widgets/grabtube_progress_indicator.dart';
+import '../blocs/download/download_bloc.dart';
+import '../blocs/download/download_event.dart';
 
 /// Search page for filtering and searching downloads
 class SearchPage extends StatefulWidget {
@@ -21,6 +25,12 @@ class _SearchPageState extends State<SearchPage> {
   String _sortBy = 'title';
   String _sortOrder = 'asc';
   bool _favoritesOnly = false;
+
+  // Advanced filter fields
+  List<String> _selectedStatuses = [];
+  List<String> _selectedFormats = [];
+  String? _selectedQuality;
+  DateTimeRange? _dateRange;
 
   @override
   void initState() {
@@ -97,7 +107,7 @@ class _SearchPageState extends State<SearchPage> {
               },
               builder: (context, state) {
                 if (state is SearchLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return _buildLoadingShimmer();
                 }
 
                 if (state is SearchSuccess || state is SearchMoreResultsLoaded) {
@@ -192,6 +202,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget _buildResultsList(BuildContext context, SearchResult result) {
     return ListView.builder(
       controller: _scrollController,
+      padding: const EdgeInsets.only(top: 8, bottom: 16),
       itemCount: result.downloads.length + (result.hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index >= result.downloads.length) {
@@ -202,35 +213,78 @@ class _SearchPageState extends State<SearchPage> {
         }
 
         final download = result.downloads[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: _getStatusColor(download.status.name),
-              child: Icon(
-                _getStatusIcon(download.status.name),
-                color: Colors.white,
-              ),
-            ),
-            title: Text(
-              download.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                Text('Status: ${download.status}'),
-                if (download.quality != null)
-                  Text('Quality: ${download.quality}'),
-              ],
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.arrow_forward),
-              onPressed: () {
-                // Navigate to download details
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: AnimatedListItem(
+            index: index,
+            child: DownloadListItem(
+              download: download,
+              onDelete: () {
+                context.read<DownloadBloc>().add(
+                      DeleteDownloadEvent(download.id),
+                    );
               },
+              onStart: download.status.name.toLowerCase() == 'pending'
+                  ? () {
+                      context.read<DownloadBloc>().add(
+                            StartDownloadEvent(download.id),
+                          );
+                    }
+                  : null,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildLoadingShimmer() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Thumbnail shimmer
+                  ShimmerLoading(
+                    width: 120,
+                    height: 68,
+                    borderRadius: 8,
+                  ),
+                  const SizedBox(width: 12),
+                  // Content shimmer
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ShimmerLoading(
+                          width: double.infinity,
+                          height: 20,
+                          borderRadius: 4,
+                        ),
+                        const SizedBox(height: 8),
+                        ShimmerLoading(
+                          width: 150,
+                          height: 16,
+                          borderRadius: 4,
+                        ),
+                        const SizedBox(height: 8),
+                        ShimmerLoading(
+                          width: 100,
+                          height: 16,
+                          borderRadius: 4,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -298,36 +352,6 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return Colors.green;
-      case 'downloading':
-        return Colors.blue;
-      case 'pending':
-        return Colors.orange;
-      case 'error':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return Icons.check_circle;
-      case 'downloading':
-        return Icons.download;
-      case 'pending':
-        return Icons.pending;
-      case 'error':
-        return Icons.error;
-      default:
-        return Icons.help;
-    }
-  }
-
   void _showSortDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -381,30 +405,160 @@ class _SearchPageState extends State<SearchPage> {
   void _showFiltersDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Advanced Filters'),
-        content: const SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Advanced filtering options coming soon'),
-              // Additional filter widgets would go here
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text('Advanced Filters'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Status Filter
+                  const Text(
+                    'Status',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ['downloading', 'completed', 'pending', 'error', 'canceled']
+                        .map((status) => FilterChip(
+                              label: Text(status[0].toUpperCase() + status.substring(1)),
+                              selected: _selectedStatuses.contains(status),
+                              onSelected: (selected) {
+                                setDialogState(() {
+                                  if (selected) {
+                                    _selectedStatuses.add(status);
+                                  } else {
+                                    _selectedStatuses.remove(status);
+                                  }
+                                });
+                              },
+                            ))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Format Filter
+                  const Text(
+                    'Format',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ['mp4', 'webm', 'mkv', 'm4a', 'mp3', 'flac']
+                        .map((format) => FilterChip(
+                              label: Text(format.toUpperCase()),
+                              selected: _selectedFormats.contains(format),
+                              onSelected: (selected) {
+                                setDialogState(() {
+                                  if (selected) {
+                                    _selectedFormats.add(format);
+                                  } else {
+                                    _selectedFormats.remove(format);
+                                  }
+                                });
+                              },
+                            ))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Quality Filter
+                  const Text(
+                    'Quality',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: ['4K', '1080p', '720p', '480p', '360p', 'best', 'worst']
+                        .map((quality) => ChoiceChip(
+                              label: Text(quality),
+                              selected: _selectedQuality == quality,
+                              onSelected: (selected) {
+                                setDialogState(() {
+                                  _selectedQuality = selected ? quality : null;
+                                });
+                              },
+                            ))
+                        .toList(),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Date Range Filter
+                  const Text(
+                    'Date Range',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final picked = await showDateRangePicker(
+                        context: context,
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime.now(),
+                        initialDateRange: _dateRange,
+                      );
+                      if (picked != null) {
+                        setDialogState(() {
+                          _dateRange = picked;
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.calendar_today),
+                    label: Text(
+                      _dateRange == null
+                          ? 'Select Date Range'
+                          : '${_dateRange!.start.toString().split(' ')[0]} - ${_dateRange!.end.toString().split(' ')[0]}',
+                    ),
+                  ),
+                  if (_dateRange != null) ...[
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () {
+                        setDialogState(() {
+                          _dateRange = null;
+                        });
+                      },
+                      icon: const Icon(Icons.clear),
+                      label: const Text('Clear Date Range'),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  // Reset all filters
+                  setState(() {
+                    _selectedStatuses.clear();
+                    _selectedFormats.clear();
+                    _selectedQuality = null;
+                    _dateRange = null;
+                  });
+                  Navigator.pop(context);
+                },
+                child: const Text('Reset'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {});
+                  _performSearch();
+                },
+                child: const Text('Apply'),
+              ),
             ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _performSearch();
-            },
-            child: const Text('Apply'),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
