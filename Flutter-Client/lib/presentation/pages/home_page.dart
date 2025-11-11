@@ -9,13 +9,19 @@ import '../blocs/download/download_event.dart';
 import '../blocs/download/download_state.dart';
 import '../blocs/jdownloader/jdownloader_bloc.dart';
 import '../blocs/search/search_bloc.dart';
+import '../blocs/qr_scanner/qr_scanner_bloc.dart';
+import '../blocs/favorites/favorites_bloc.dart';
+import '../blocs/schedule/schedule_bloc.dart';
 import '../widgets/download_list_item.dart';
 import '../widgets/add_download_dialog.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/adaptive_qr_scanner.dart';
 import 'history_page.dart';
 import 'search_page.dart';
-import 'jdownloader_dashboard_page.dart';
+import 'jdownloader_page.dart';
+import 'favorites_page.dart';
+import 'schedule_page.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -46,6 +52,7 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _buildNavigationDrawer(context),
       appBar: AppBar(
         title: const Text(
           AppConstants.appName,
@@ -76,7 +83,7 @@ class _HomePageState extends State<HomePage>
                 MaterialPageRoute(
                   builder: (context) => BlocProvider.value(
                     value: context.read<JDownloaderBloc>(),
-                    child: const JDownloaderDashboardPage(),
+                    child: const JDownloaderPage(),
                   ),
                 ),
               );
@@ -108,7 +115,12 @@ class _HomePageState extends State<HomePage>
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
             onPressed: () {
-              // Navigate to settings
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(),
+                ),
+              );
             },
           ),
         ],
@@ -353,6 +365,164 @@ class _HomePageState extends State<HomePage>
       builder: (dialogContext) => BlocProvider.value(
         value: context.read<DownloadBloc>(),
         child: AddDownloadDialog(initialUrl: url),
+      ),
+    );
+  }
+
+  Widget _buildNavigationDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Icon(
+                  Icons.download,
+                  size: 48,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  AppConstants.appName,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                Text(
+                  'Multi-platform downloader',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white70,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.favorite),
+            title: const Text('Favorites'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => getIt<FavoritesBloc>(),
+                    child: const FavoritesPage(),
+                  ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.schedule),
+            title: const Text('Scheduled Downloads'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => getIt<ScheduleBloc>(),
+                    child: const SchedulePage(),
+                  ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.qr_code_scanner),
+            title: const Text('QR Scanner'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => getIt<QRScannerBloc>(),
+                    child: const QRScannerPage(),
+                  ),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.search),
+            title: const Text('Search & Filter'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => getIt<SearchBloc>(),
+                    child: const SearchPage(),
+                  ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.history),
+            title: const Text('History'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider.value(
+                    value: context.read<DownloadBloc>(),
+                    child: const HistoryPage(),
+                  ),
+                ),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.cloud_download),
+            title: const Text('JDownloader'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider.value(
+                    value: context.read<JDownloaderBloc>(),
+                    child: const JDownloaderPage(),
+                  ),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            onTap: () {
+              Navigator.pop(context); // Close drawer
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsPage(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
