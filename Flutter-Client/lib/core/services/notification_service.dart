@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import '../../domain/entities/download_schedule.dart';
@@ -151,7 +152,7 @@ class NotificationService {
     }
 
     try {
-      const androidDetails = AndroidNotificationDetails(
+      final androidDetails = AndroidNotificationDetails(
         'schedule_channel',
         'Schedule Notifications',
         channelDescription: 'Notifications for scheduled download execution',
@@ -168,7 +169,7 @@ class NotificationService {
         presentSound: true,
       );
 
-      const notificationDetails = NotificationDetails(
+      final notificationDetails = NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
         macOS: iosDetails,
@@ -246,7 +247,7 @@ class NotificationService {
     }
 
     try {
-      const androidDetails = AndroidNotificationDetails(
+      final androidDetails = AndroidNotificationDetails(
         'download_channel',
         'Download Notifications',
         channelDescription: 'Notifications for download events',
@@ -263,7 +264,7 @@ class NotificationService {
         presentSound: true,
       );
 
-      const notificationDetails = NotificationDetails(
+      final notificationDetails = NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
         macOS: iosDetails,
