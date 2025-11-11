@@ -5,6 +5,10 @@ import '../core/di/injection.dart';
 import '../core/constants/app_constants.dart';
 import 'blocs/download/download_bloc.dart';
 import 'blocs/jdownloader/jdownloader_bloc.dart';
+import 'blocs/qr_scanner/qr_scanner_bloc.dart';
+import 'blocs/search/search_bloc.dart';
+import 'blocs/favorites/favorites_bloc.dart';
+import 'blocs/schedule/schedule_bloc.dart';
 import 'pages/home_page.dart';
 
 class GrabTubeApp extends StatelessWidget {
@@ -19,6 +23,18 @@ class GrabTubeApp extends StatelessWidget {
         ),
         BlocProvider<JDownloaderBloc>(
           create: (_) => getIt<JDownloaderBloc>(),
+        ),
+        BlocProvider<QRScannerBloc>(
+          create: (_) => getIt<QRScannerBloc>(),
+        ),
+        BlocProvider<SearchBloc>(
+          create: (_) => getIt<SearchBloc>(),
+        ),
+        BlocProvider<FavoritesBloc>(
+          create: (_) => getIt<FavoritesBloc>(),
+        ),
+        BlocProvider<ScheduleBloc>(
+          create: (_) => getIt<ScheduleBloc>(),
         ),
       ],
       child: MaterialApp(
