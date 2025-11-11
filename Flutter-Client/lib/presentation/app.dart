@@ -18,6 +18,7 @@ import 'blocs/favorites/favorites_bloc.dart';
 import 'blocs/schedule/schedule_bloc.dart';
 import 'blocs/settings/settings_bloc.dart';
 import 'blocs/settings/settings_event.dart';
+import 'blocs/settings/settings_state.dart';
 import 'pages/home_page.dart';
 
 class GrabTubeApp extends StatelessWidget {
@@ -49,13 +50,41 @@ class GrabTubeApp extends StatelessWidget {
           create: (_) => getIt<SettingsBloc>()..add(const LoadSettings()),
         ),
       ],
-      child: MaterialApp(
-        title: AppConstants.appName,
-        debugShowCheckedModeBanner: false,
-        theme: _buildLightTheme(),
-        darkTheme: _buildDarkTheme(),
-        themeMode: ThemeMode.system,
-        home: const _AppHomeWrapper(),
+      child: BlocBuilder<SettingsBloc, SettingsState>(
+        buildWhen: (previous, current) {
+          // Rebuild when settings are loaded or theme mode changes
+          if (previous is SettingsLoaded && current is SettingsLoaded) {
+            return previous.themeMode != current.themeMode;
+          }
+          return current is SettingsLoaded;
+        },
+        builder: (context, state) {
+          // Determine theme mode from settings
+          ThemeMode themeMode = ThemeMode.system; // default
+          if (state is SettingsLoaded) {
+            switch (state.themeMode) {
+              case 'light':
+                themeMode = ThemeMode.light;
+                break;
+              case 'dark':
+                themeMode = ThemeMode.dark;
+                break;
+              case 'system':
+              default:
+                themeMode = ThemeMode.system;
+                break;
+            }
+          }
+
+          return MaterialApp(
+            title: AppConstants.appName,
+            debugShowCheckedModeBanner: false,
+            theme: _buildLightTheme(),
+            darkTheme: _buildDarkTheme(),
+            themeMode: themeMode,
+            home: const _AppHomeWrapper(),
+          );
+        },
       ),
     );
   }
