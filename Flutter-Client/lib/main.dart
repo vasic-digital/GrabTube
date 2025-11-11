@@ -7,6 +7,7 @@ import 'package:workmanager/workmanager.dart';
 import 'core/di/injection.dart';
 import 'core/constants/app_constants.dart';
 import 'core/utils/logger.dart';
+import 'core/services/schedule_service.dart';
 import 'presentation/app.dart';
 
 /// Background task callback for download notifications and background processing
@@ -34,6 +35,11 @@ void main() async {
     // Initialize dependency injection
     await configureDependencies();
     AppLogger.info('Dependencies configured');
+
+    // Start schedule service for background schedule checking
+    final scheduleService = getIt<ScheduleService>();
+    scheduleService.start();
+    AppLogger.info('Schedule service started');
 
     // Initialize background task manager (mobile only)
     if (!kIsWeb) {
