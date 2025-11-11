@@ -20,9 +20,13 @@ import 'blocs/settings/settings_bloc.dart';
 import 'blocs/settings/settings_event.dart';
 import 'blocs/settings/settings_state.dart';
 import 'pages/home_page.dart';
+import 'pages/schedule_page.dart';
 
 class GrabTubeApp extends StatelessWidget {
   const GrabTubeApp({super.key});
+
+  // Global navigation key for notification navigation
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +83,7 @@ class GrabTubeApp extends StatelessWidget {
           return MaterialApp(
             title: AppConstants.appName,
             debugShowCheckedModeBanner: false,
+            navigatorKey: navigatorKey,
             theme: _buildLightTheme(),
             darkTheme: _buildDarkTheme(),
             themeMode: themeMode,
@@ -219,9 +224,63 @@ class _AppHomeWrapperState extends State<_AppHomeWrapper> {
         print('   Quality: ${schedule.quality ?? "best"}, Format: ${schedule.format ?? "mp4"}');
       });
 
+      // Register notification tap callback
+      notificationService.setNotificationTapCallback(_handleNotificationTap);
+
       print('✅ Schedule-Download integration established with notifications');
     } catch (e) {
       print('⚠️  Failed to set up Schedule-Download integration: $e');
+    }
+  }
+
+  /// Handle notification tap navigation
+  void _handleNotificationTap(String payload) {
+    print('🔔 Handling notification tap: $payload');
+
+    try {
+      // Parse payload format: "type:id"
+      final parts = payload.split(':');
+      if (parts.length != 2) {
+        print('⚠️  Invalid notification payload format: $payload');
+        return;
+      }
+
+      final type = parts[0];
+      final id = parts[1];
+
+      // Navigate based on type
+      final navigator = GrabTubeApp.navigatorKey.currentState;
+      if (navigator == null) {
+        print('⚠️  Navigator not available');
+        return;
+      }
+
+      switch (type) {
+        case 'schedule':
+          // Navigate to Schedule page
+          print('📅 Navigating to Schedule page for ID: $id');
+          navigator.push(
+            MaterialPageRoute(
+              builder: (context) => BlocProvider.value(
+                value: getIt<ScheduleBloc>(),
+                child: const SchedulePage(),
+              ),
+            ),
+          );
+          break;
+
+        case 'download':
+          // Navigate to Home page (downloads tab)
+          print('⬇️  Navigating to Downloads (Home)');
+          // Pop to root if not already there
+          navigator.popUntil((route) => route.isFirst);
+          break;
+
+        default:
+          print('⚠️  Unknown notification type: $type');
+      }
+    } catch (e) {
+      print('⚠️  Failed to handle notification tap: $e');
     }
   }
 
