@@ -1,22 +1,23 @@
 # Flutter Installation Status
 
 **Date:** November 11, 2025
-**Status:** ✅ Download in Progress
+**Status:** 🔄 Download in Progress (Restarted)
 **Version:** Flutter 3.35.7 (stable) for macOS arm64
 
 ---
 
-## 🎉 Success!
+## 🔄 Download Restarted
 
-The Flutter SDK download has started successfully using the updated automation script.
+The initial download stalled after 45 minutes at ~17 KB/s. We've cleaned up and restarted with a fresh download that's now progressing at a healthy speed (~500-600 KB/s).
 
 ### Download Details
 
 - **URL:** https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_arm64_3.35.7-stable.zip
 - **Size:** ~2 GB (1991 MB)
-- **Progress:** Downloading... (started at ~1.4 MB/s)
-- **Estimated Time:** 20-30 minutes
+- **Progress:** Downloading... (~2.8 MB downloaded, ~500-600 KB/s)
+- **Estimated Time:** ~1 hour
 - **Destination:** `tools/flutter-sdk/`
+- **Status:** Fresh download in progress (previous attempt stalled)
 
 ---
 
