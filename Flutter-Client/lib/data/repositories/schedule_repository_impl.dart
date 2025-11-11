@@ -1,40 +1,74 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:injectable/injectable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../domain/entities/schedule.dart';
-import '../../domain/entities/scheduled_download.dart';
+import '../../domain/entities/download_schedule.dart';
 import '../../domain/repositories/schedule_repository.dart';
-import '../models/schedule_model.dart';
-import '../models/scheduled_download_model.dart';
+import '../models/download_schedule_model.dart';
 
-/// Implementation of ScheduleRepository using Hive for local storage
+/// Implementation of ScheduleRepository using Hive
 @LazySingleton(as: ScheduleRepository)
 class ScheduleRepositoryImpl implements ScheduleRepository {
-  ScheduleRepositoryImpl(
-    this._schedulesBox,
-    this._scheduledDownloadsBox,
-  );
+  ScheduleRepositoryImpl(this._schedulesBox);
 
-  final Box<ScheduleModel> _schedulesBox;
-  final Box<ScheduledDownloadModel> _scheduledDownloadsBox;
+  final Box<String> _schedulesBox;
 
-  final _scheduleController = StreamController<Schedule>.broadcast();
-  final _scheduledDownloadController =
-      StreamController<ScheduledDownload>.broadcast();
+  final _schedulesController = StreamController<List<DownloadSchedule>>.broadcast();
 
   @override
-  Stream<Schedule> get scheduleUpdates => _scheduleController.stream;
+  Stream<List<DownloadSchedule>> get scheduleUpdates => _schedulesController.stream;
 
   @override
-  Stream<ScheduledDownload> get scheduledDownloadUpdates =>
-      _scheduledDownloadController.stream;
-
-  @override
-  Future<Schedule> createSchedule(Schedule schedule) async {
+  Future<List<DownloadSchedule>> getSchedules() async {
     try {
-      final model = ScheduleModel.fromEntity(schedule);
-      await _schedulesBox.put(schedule.id, model);
-      _scheduleController.add(schedule);
+      final schedules = <DownloadSchedule>[];
+      for (final key in _schedulesBox.keys) {
+        final jsonString = _schedulesBox.get(key);
+        if (jsonString != null) {
+          final json = jsonDecode(jsonString) as Map<String, dynamic>;
+          final model = DownloadScheduleModel.fromJson(json);
+          schedules.add(model.toEntity());
+        }
+      }
+      return schedules;
+    } catch (e) {
+      throw Exception('Failed to get schedules: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<DownloadSchedule?> getSchedule(String id) async {
+    try {
+      final jsonString = _schedulesBox.get(id);
+      if (jsonString == null) return null;
+
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      final model = DownloadScheduleModel.fromJson(json);
+      return model.toEntity();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  @override
+  Future<List<DownloadSchedule>> getPendingSchedules() async {
+    final schedules = await getSchedules();
+    return schedules.where((s) => s.status == ScheduleStatus.pending).toList();
+  }
+
+  @override
+  Future<List<DownloadSchedule>> getDueSchedules() async {
+    final schedules = await getPendingSchedules();
+    return schedules.where((s) => s.isDue).toList();
+  }
+
+  @override
+  Future<DownloadSchedule> createSchedule(DownloadSchedule schedule) async {
+    try {
+      final model = DownloadScheduleModel.fromEntity(schedule);
+      final jsonString = jsonEncode(model.toJson());
+      await _schedulesBox.put(schedule.id, jsonString);
+      await _notifySchedulesChanged();
       return schedule;
     } catch (e) {
       throw Exception('Failed to create schedule: ${e.toString()}');
@@ -42,251 +76,68 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   }
 
   @override
-  Future<Schedule> updateSchedule(Schedule schedule) async {
+  Future<void> updateSchedule(DownloadSchedule schedule) async {
     try {
-      if (!_schedulesBox.containsKey(schedule.id)) {
-        throw Exception('Schedule not found: ${schedule.id}');
-      }
-
-      final model = ScheduleModel.fromEntity(schedule);
-      await _schedulesBox.put(schedule.id, model);
-      _scheduleController.add(schedule);
-      return schedule;
+      final model = DownloadScheduleModel.fromEntity(schedule);
+      final jsonString = jsonEncode(model.toJson());
+      await _schedulesBox.put(schedule.id, jsonString);
+      await _notifySchedulesChanged();
     } catch (e) {
       throw Exception('Failed to update schedule: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> deleteSchedule(String scheduleId) async {
+  Future<void> deleteSchedule(String id) async {
     try {
-      await _schedulesBox.delete(scheduleId);
-
-      // Also delete associated scheduled downloads
-      final scheduledDownloads = await getScheduledDownloads(scheduleId);
-      for (final sd in scheduledDownloads) {
-        await deleteScheduledDownload(sd.id);
-      }
+      await _schedulesBox.delete(id);
+      await _notifySchedulesChanged();
     } catch (e) {
       throw Exception('Failed to delete schedule: ${e.toString()}');
     }
   }
 
   @override
-  Future<Schedule?> getScheduleById(String scheduleId) async {
+  Future<void> cancelSchedule(String id) async {
     try {
-      final model = _schedulesBox.get(scheduleId);
-      return model?.toEntity();
-    } catch (e) {
-      return null;
-    }
-  }
-
-  @override
-  Future<List<Schedule>> getAllSchedules() async {
-    try {
-      final models = _schedulesBox.values.toList();
-      return models.map((model) => model.toEntity()).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  @override
-  Future<List<Schedule>> getActiveSchedules() async {
-    try {
-      final allSchedules = await getAllSchedules();
-      return allSchedules.where((s) => s.isActive).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  @override
-  Future<List<Schedule>> getSchedulesByType(ScheduleType type) async {
-    try {
-      final allSchedules = await getAllSchedules();
-      return allSchedules.where((s) => s.type == type).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  @override
-  Future<void> toggleSchedule(String scheduleId, bool isActive) async {
-    try {
-      final schedule = await getScheduleById(scheduleId);
-      if (schedule == null) {
-        throw Exception('Schedule not found: $scheduleId');
+      final schedule = await getSchedule(id);
+      if (schedule != null) {
+        final updatedSchedule = schedule.copyWith(
+          status: ScheduleStatus.canceled,
+        );
+        await updateSchedule(updatedSchedule);
       }
-
-      // Create updated schedule with new isActive value
-      final updatedSchedule = Schedule(
-        id: schedule.id,
-        name: schedule.name,
-        description: schedule.description,
-        type: schedule.type,
-        startDate: schedule.startDate,
-        startTime: schedule.startTime,
-        recurrencePattern: schedule.recurrencePattern,
-        weekDays: schedule.weekDays,
-        interval: schedule.interval,
-        timeUnit: schedule.timeUnit,
-        dayOfMonth: schedule.dayOfMonth,
-        isActive: isActive,
-        createdAt: schedule.createdAt,
-        lastExecutedAt: schedule.lastExecutedAt,
-        metadata: schedule.metadata,
-      );
-
-      await updateSchedule(updatedSchedule);
     } catch (e) {
-      throw Exception('Failed to toggle schedule: ${e.toString()}');
+      throw Exception('Failed to cancel schedule: ${e.toString()}');
     }
   }
 
   @override
-  Future<List<Schedule>> getSchedulesToExecute() async {
+  Future<void> executeSchedule(String id) async {
     try {
-      final activeSchedules = await getActiveSchedules();
-      final now = DateTime.now();
-      final toExecute = <Schedule>[];
-
-      for (final schedule in activeSchedules) {
-        final nextExecution = schedule.calculateNextExecution();
-        if (nextExecution != null && nextExecution.isBefore(now)) {
-          toExecute.add(schedule);
-        }
+      final schedule = await getSchedule(id);
+      if (schedule != null) {
+        final updatedSchedule = schedule.copyWith(
+          status: ScheduleStatus.executing,
+        );
+        await updateSchedule(updatedSchedule);
       }
-
-      return toExecute;
     } catch (e) {
-      return [];
+      throw Exception('Failed to execute schedule: ${e.toString()}');
     }
   }
 
-  @override
-  Future<void> markScheduleExecuted(
-    String scheduleId,
-    DateTime executedAt,
-  ) async {
+  Future<void> _notifySchedulesChanged() async {
     try {
-      final schedule = await getScheduleById(scheduleId);
-      if (schedule == null) {
-        throw Exception('Schedule not found: $scheduleId');
-      }
-
-      final updatedSchedule = Schedule(
-        id: schedule.id,
-        name: schedule.name,
-        description: schedule.description,
-        type: schedule.type,
-        startDate: schedule.startDate,
-        startTime: schedule.startTime,
-        recurrencePattern: schedule.recurrencePattern,
-        weekDays: schedule.weekDays,
-        interval: schedule.interval,
-        timeUnit: schedule.timeUnit,
-        dayOfMonth: schedule.dayOfMonth,
-        isActive: schedule.isActive,
-        createdAt: schedule.createdAt,
-        lastExecutedAt: executedAt,
-        metadata: schedule.metadata,
-      );
-
-      await updateSchedule(updatedSchedule);
+      final schedules = await getSchedules();
+      _schedulesController.add(schedules);
     } catch (e) {
-      throw Exception('Failed to mark schedule executed: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<ScheduledDownload> createScheduledDownload(
-    ScheduledDownload scheduledDownload,
-  ) async {
-    try {
-      final model = ScheduledDownloadModel.fromEntity(scheduledDownload);
-      await _scheduledDownloadsBox.put(scheduledDownload.id, model);
-      _scheduledDownloadController.add(scheduledDownload);
-      return scheduledDownload;
-    } catch (e) {
-      throw Exception('Failed to create scheduled download: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<void> updateScheduledDownload(
-    ScheduledDownload scheduledDownload,
-  ) async {
-    try {
-      if (!_scheduledDownloadsBox.containsKey(scheduledDownload.id)) {
-        throw Exception('Scheduled download not found: ${scheduledDownload.id}');
-      }
-
-      final model = ScheduledDownloadModel.fromEntity(scheduledDownload);
-      await _scheduledDownloadsBox.put(scheduledDownload.id, model);
-      _scheduledDownloadController.add(scheduledDownload);
-    } catch (e) {
-      throw Exception('Failed to update scheduled download: ${e.toString()}');
-    }
-  }
-
-  @override
-  Future<List<ScheduledDownload>> getScheduledDownloads(
-    String scheduleId,
-  ) async {
-    try {
-      final allScheduledDownloads = await getAllScheduledDownloads();
-      return allScheduledDownloads
-          .where((sd) => sd.scheduleId == scheduleId)
-          .toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  @override
-  Future<List<ScheduledDownload>> getAllScheduledDownloads() async {
-    try {
-      final models = _scheduledDownloadsBox.values.toList();
-      return models.map((model) => model.toEntity()).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  @override
-  Future<List<ScheduledDownload>> getPendingScheduledDownloads() async {
-    try {
-      final allScheduledDownloads = await getAllScheduledDownloads();
-      return allScheduledDownloads.where((sd) => !sd.isExecuted).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  @override
-  Future<List<ScheduledDownload>> getCompletedScheduledDownloads() async {
-    try {
-      final allScheduledDownloads = await getAllScheduledDownloads();
-      return allScheduledDownloads.where((sd) => sd.isExecuted).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  @override
-  Future<void> deleteScheduledDownload(String scheduledDownloadId) async {
-    try {
-      await _scheduledDownloadsBox.delete(scheduledDownloadId);
-    } catch (e) {
-      throw Exception('Failed to delete scheduled download: ${e.toString()}');
+      // Silently fail - this is just for notifications
     }
   }
 
   @disposeMethod
   void dispose() {
-    _scheduleController.close();
-    _scheduledDownloadController.close();
+    _schedulesController.close();
   }
 }

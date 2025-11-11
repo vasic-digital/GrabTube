@@ -1,14 +1,16 @@
 import 'package:dartz/dartz.dart';
-import '../../entities/schedule.dart';
+import 'package:injectable/injectable.dart';
+import '../../entities/download_schedule.dart';
 import '../../repositories/schedule_repository.dart';
 
-/// Use case for creating a new schedule
+/// Use case for creating a schedule
+@injectable
 class CreateScheduleUseCase {
-  final ScheduleRepository _repository;
-
   CreateScheduleUseCase(this._repository);
 
-  Future<Either<String, Schedule>> call(Schedule schedule) async {
+  final ScheduleRepository _repository;
+
+  Future<Either<String, DownloadSchedule>> call(DownloadSchedule schedule) async {
     try {
       final created = await _repository.createSchedule(schedule);
       return Right(created);
