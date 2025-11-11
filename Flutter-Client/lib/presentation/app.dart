@@ -6,9 +6,11 @@ import '../core/constants/app_constants.dart';
 import '../core/services/schedule_service.dart';
 import '../core/services/notification_service.dart';
 import '../core/services/settings_service.dart';
+import '../domain/entities/download.dart';
 import '../domain/entities/download_schedule.dart';
 import 'blocs/download/download_bloc.dart';
 import 'blocs/download/download_event.dart';
+import 'blocs/download/download_state.dart';
 import 'blocs/jdownloader/jdownloader_bloc.dart';
 import 'blocs/qr_scanner/qr_scanner_bloc.dart';
 import 'blocs/search/search_bloc.dart';
@@ -149,6 +151,9 @@ class _AppHomeWrapper extends StatefulWidget {
 }
 
 class _AppHomeWrapperState extends State<_AppHomeWrapper> {
+  // Track download statuses to detect completion/failure
+  final Map<String, DownloadStatus> _previousDownloadStatuses = {};
+
   @override
   void initState() {
     super.initState();
@@ -191,8 +196,61 @@ class _AppHomeWrapperState extends State<_AppHomeWrapper> {
     }
   }
 
+  void _handleDownloadStateChange(
+    BuildContext context,
+    DownloadState state,
+  ) {
+    if (state is! DownloadsLoaded) return;
+
+    final notificationService = getIt<NotificationService>();
+    final settingsService = getIt<SettingsService>();
+
+    // Check if notifications are enabled
+    if (!settingsService.notificationsEnabled) return;
+
+    // Check all downloads for status changes
+    final allDownloads = [...state.queue, ...state.completed, ...state.pending];
+
+    for (final download in allDownloads) {
+      final previousStatus = _previousDownloadStatuses[download.id];
+      final currentStatus = download.status;
+
+      // Skip if status hasn't changed
+      if (previousStatus == currentStatus) continue;
+
+      // Update tracked status
+      _previousDownloadStatuses[download.id] = currentStatus;
+
+      // Skip if previous status was null (first time seeing this download)
+      if (previousStatus == null) continue;
+
+      // Show notification for completed downloads
+      if (currentStatus == DownloadStatus.completed &&
+          previousStatus != DownloadStatus.completed) {
+        notificationService.showDownloadCompletedNotification(
+          download.title,
+          null, // filename not available in current model
+        );
+        print('✅ Download completed notification shown: ${download.title}');
+      }
+
+      // Show notification for failed downloads
+      if (currentStatus == DownloadStatus.error &&
+          previousStatus != DownloadStatus.error) {
+        notificationService.showDownloadFailedNotification(
+          download.title,
+          download.error ?? 'Unknown error',
+        );
+        print('⚠️  Download failed notification shown: ${download.title}');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const HomePage();
+    return BlocListener<DownloadBloc, DownloadState>(
+      listener: _handleDownloadStateChange,
+      child: const HomePage(),
+    );
   }
 }
