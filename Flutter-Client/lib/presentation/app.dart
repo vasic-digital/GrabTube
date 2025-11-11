@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/di/injection.dart';
 import '../core/constants/app_constants.dart';
 import '../core/services/schedule_service.dart';
+import '../core/services/notification_service.dart';
+import '../core/services/settings_service.dart';
 import '../domain/entities/download_schedule.dart';
 import 'blocs/download/download_bloc.dart';
 import 'blocs/download/download_event.dart';
@@ -161,6 +163,8 @@ class _AppHomeWrapperState extends State<_AppHomeWrapper> {
     try {
       final scheduleService = getIt<ScheduleService>();
       final downloadBloc = context.read<DownloadBloc>();
+      final notificationService = getIt<NotificationService>();
+      final settingsService = getIt<SettingsService>();
 
       // Register download trigger callback
       scheduleService.setDownloadTrigger((DownloadSchedule schedule) {
@@ -172,11 +176,16 @@ class _AppHomeWrapperState extends State<_AppHomeWrapper> {
           autoStart: true,
         ));
 
+        // Show notification if enabled in settings
+        if (settingsService.scheduleNotificationsEnabled) {
+          notificationService.showScheduleExecutedNotification(schedule);
+        }
+
         print('✅ Schedule triggered download: ${schedule.url}');
         print('   Quality: ${schedule.quality ?? "best"}, Format: ${schedule.format ?? "mp4"}');
       });
 
-      print('✅ Schedule-Download integration established');
+      print('✅ Schedule-Download integration established with notifications');
     } catch (e) {
       print('⚠️  Failed to set up Schedule-Download integration: $e');
     }

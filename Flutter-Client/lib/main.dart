@@ -8,6 +8,7 @@ import 'core/di/injection.dart';
 import 'core/constants/app_constants.dart';
 import 'core/utils/logger.dart';
 import 'core/services/schedule_service.dart';
+import 'core/services/notification_service.dart';
 import 'presentation/app.dart';
 
 /// Background task callback for download notifications and background processing
@@ -40,6 +41,15 @@ void main() async {
     final scheduleService = getIt<ScheduleService>();
     scheduleService.start();
     AppLogger.info('Schedule service started');
+
+    // Initialize notification service and request permissions
+    if (!kIsWeb) {
+      final notificationService = getIt<NotificationService>();
+      await notificationService.requestPermissions();
+      AppLogger.info('Notification service initialized');
+    } else {
+      AppLogger.info('Notification service skipped (web platform)');
+    }
 
     // Initialize background task manager (mobile only)
     if (!kIsWeb) {
