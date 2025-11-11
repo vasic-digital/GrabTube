@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../blocs/qr_scanner/qr_scanner_bloc.dart';
 import '../blocs/qr_scanner/qr_scanner_event.dart';
 import '../blocs/qr_scanner/qr_scanner_state.dart';
+import '../blocs/download/download_bloc.dart';
+import '../blocs/download/download_event.dart';
+import '../widgets/add_download_dialog.dart';
 
 /// QR Scanner page for scanning video URLs
 class QRScannerPage extends StatefulWidget {
@@ -15,17 +19,21 @@ class QRScannerPage extends StatefulWidget {
 
 class _QRScannerPageState extends State<QRScannerPage> {
   MobileScannerController? _scannerController;
+  final TextEditingController _urlController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Check camera permission on init
-    context.read<QRScannerBloc>().add(const CheckCameraPermissionEvent());
+    // Only check camera permission on mobile platforms
+    if (!kIsWeb) {
+      context.read<QRScannerBloc>().add(const CheckCameraPermissionEvent());
+    }
   }
 
   @override
   void dispose() {
     _scannerController?.dispose();
+    _urlController.dispose();
     super.dispose();
   }
 
@@ -87,14 +95,16 @@ class _QRScannerPageState extends State<QRScannerPage> {
           return _buildInitialView(context);
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _scannerController = MobileScannerController();
-          context.read<QRScannerBloc>().add(const ScanQRCodeEvent());
-        },
-        icon: const Icon(Icons.qr_code_scanner),
-        label: const Text('Scan QR Code'),
-      ),
+      floatingActionButton: kIsWeb
+          ? null // Hide FAB on web since we have inline input
+          : FloatingActionButton.extended(
+              onPressed: () {
+                _scannerController = MobileScannerController();
+                context.read<QRScannerBloc>().add(const ScanQRCodeEvent());
+              },
+              icon: const Icon(Icons.qr_code_scanner),
+              label: const Text('Scan QR Code'),
+            ),
     );
   }
 
@@ -259,6 +269,72 @@ class _QRScannerPageState extends State<QRScannerPage> {
   }
 
   Widget _buildInitialView(BuildContext context) {
+    if (kIsWeb) {
+      // Web-friendly manual URL input
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.link,
+                  size: 120,
+                  color: Theme.of(context).primaryColor,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Enter Video URL',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Paste a video URL from YouTube or other supported sites',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 32),
+                TextField(
+                  controller: _urlController,
+                  decoration: InputDecoration(
+                    labelText: 'Video URL',
+                    hintText: 'https://www.youtube.com/watch?v=...',
+                    prefixIcon: const Icon(Icons.link),
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () => _urlController.clear(),
+                    ),
+                  ),
+                  keyboardType: TextInputType.url,
+                  textInputAction: TextInputAction.go,
+                  onSubmitted: (url) => _processManualUrl(url),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => _processManualUrl(_urlController.text),
+                    icon: const Icon(Icons.download),
+                    label: const Text('Add Download'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.all(16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Mobile QR scanner view
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -284,6 +360,27 @@ class _QRScannerPageState extends State<QRScannerPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _processManualUrl(String url) {
+    if (url.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a URL'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Validate and show add download dialog
+    context.read<QRScannerBloc>().add(ValidateUrlEvent(url.trim()));
+
+    // Show the add download dialog directly
+    showDialog(
+      context: context,
+      builder: (context) => AddDownloadDialog(initialUrl: url.trim()),
     );
   }
 
@@ -322,8 +419,13 @@ class _QRScannerPageState extends State<QRScannerPage> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                // Navigate to add download page with the URL
-                // This would be implemented with proper navigation
+                // Show add download dialog with the extracted URL
+                showDialog(
+                  context: context,
+                  builder: (dialogContext) => AddDownloadDialog(
+                    initialUrl: state.extractedUrl!,
+                  ),
+                );
               },
               child: const Text('Download'),
             ),
