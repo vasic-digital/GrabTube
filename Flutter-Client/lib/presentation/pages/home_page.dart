@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
+import '../../core/services/dlc_service.dart';
 import '../../domain/entities/download.dart';
 import '../blocs/download/download_bloc.dart';
 import '../blocs/download/download_event.dart';
@@ -24,6 +25,10 @@ import 'jdownloader_page.dart';
 import 'favorites_page.dart';
 import 'schedule_page.dart';
 import 'settings_page.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
