@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/di/injection.dart';
+import '../../domain/entities/download.dart';
 import '../blocs/download/download_bloc.dart';
 import '../blocs/download/download_event.dart';
 import '../blocs/download/download_state.dart';
@@ -17,6 +18,7 @@ import '../widgets/add_download_dialog.dart';
 import '../widgets/empty_state_widget.dart';
 import '../widgets/adaptive_qr_scanner.dart';
 import 'history_page.dart';
+import 'qr_scanner_page.dart';
 import 'search_page.dart';
 import 'jdownloader_page.dart';
 import 'favorites_page.dart';
@@ -292,7 +294,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  Widget _buildDownloadsList(List<dynamic> downloads, String where) {
+  Widget _buildDownloadsList(List<Download> downloads, String where) {
     if (downloads.isEmpty) {
       return EmptyStateWidget(
         icon: Icons.inbox,
@@ -350,7 +352,7 @@ class _HomePageState extends State<HomePage>
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => AdaptiveQRScanner(
-          onUrlScanned: (url) {
+          onScanSuccess: (url) {
             Navigator.of(context).pop();
             _showAddDownloadDialogWithUrl(context, url);
           },
@@ -453,7 +455,7 @@ class _HomePageState extends State<HomePage>
                 MaterialPageRoute(
                   builder: (context) => BlocProvider(
                     create: (context) => getIt<QRScannerBloc>(),
-                    child: const QRScannerPage(),
+                    child: QRScannerPage(),
                   ),
                 ),
               );

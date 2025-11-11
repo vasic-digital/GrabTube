@@ -150,15 +150,16 @@ Future<void> configureDependencies() async {
 
   getIt.registerLazySingleton<SearchRepository>(
     () => SearchRepositoryImpl(
-      getIt<DownloadRepository>(),
-      sharedPreferences,
+      getIt<Dio>(instanceName: 'main'),
+      getIt<Box<SearchParametersModel>>(),
     ),
   );
 
   getIt.registerLazySingleton<JDownloaderRepository>(
     () => JDownloaderRepositoryImpl(
-      getIt<JDownloaderApiClient>(),
-      sharedPreferences,
+      getIt<Dio>(instanceName: 'jdownloader'),
+      getIt<Box<JDownloaderInstanceModel>>(),
+      getIt<Box<SpeedDataPointModel>>(),
     ),
   );
 
@@ -223,11 +224,7 @@ Future<void> configureDependencies() async {
   // Register BLoCs (use factory for BLoCs to create new instances)
   getIt.registerFactory(
     () => DownloadBloc(
-      getIt<AddDownloadUseCase>(),
-      getIt<GetDownloadsUseCase>(),
-      getIt<DeleteDownloadUseCase>(),
-      getIt<StartDownloadUseCase>(),
-      getIt<GetDownloadHistoryUseCase>(),
+      getIt<DownloadRepository>(),
     ),
   );
 
@@ -251,9 +248,9 @@ Future<void> configureDependencies() async {
 
   getIt.registerFactory(
     () => FavoritesBloc(
+      getIt<GetFavoritesUseCase>(),
       getIt<AddFavoriteUseCase>(),
       getIt<RemoveFavoriteUseCase>(),
-      getIt<GetFavoritesUseCase>(),
       getIt<ToggleFavoriteUseCase>(),
       getIt<FavoritesRepository>(),
     ),

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import '../../../domain/entities/qr_scan_result.dart';
 import '../../../domain/usecases/scan_qr_code_usecase.dart';
 import '../../../domain/usecases/qr_scanner/scan_qr_from_image_usecase.dart';
 import '../../../domain/usecases/qr_scanner/validate_qr_url_usecase.dart';

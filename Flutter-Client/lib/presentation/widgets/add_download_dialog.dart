@@ -62,7 +62,8 @@ class _AddDownloadDialogState extends State<AddDownloadDialog> {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a URL';
                   }
-                  if (!Uri.tryParse(value)?.hasAbsolutePath ?? true) {
+                  final uri = Uri.tryParse(value);
+                  if (uri == null || !(uri.hasAbsolutePath)) {
                     return 'Please enter a valid URL';
                   }
                   return null;

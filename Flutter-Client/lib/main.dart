@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -34,22 +35,26 @@ void main() async {
     await configureDependencies();
     AppLogger.info('Dependencies configured');
 
-    // Initialize background task manager
-    await Workmanager().initialize(
-      callbackDispatcher,
-      isInDebugMode: AppConstants.isDebugMode,
-    );
-    AppLogger.info('WorkManager initialized');
+    // Initialize background task manager (mobile only)
+    if (!kIsWeb) {
+      await Workmanager().initialize(
+        callbackDispatcher,
+        isInDebugMode: AppConstants.isDebugMode,
+      );
+      AppLogger.info('WorkManager initialized');
 
-    // Register periodic sync task
-    await Workmanager().registerPeriodicTask(
-      'download-status-sync',
-      'syncDownloadStatus',
-      frequency: const Duration(minutes: 15),
-      constraints: Constraints(
-        networkType: NetworkType.connected,
-      ),
-    );
+      // Register periodic sync task
+      await Workmanager().registerPeriodicTask(
+        'download-status-sync',
+        'syncDownloadStatus',
+        frequency: const Duration(minutes: 15),
+        constraints: Constraints(
+          networkType: NetworkType.connected,
+        ),
+      );
+    } else {
+      AppLogger.info('WorkManager skipped (web platform)');
+    }
 
     // Run the app
     runApp(const GrabTubeApp());

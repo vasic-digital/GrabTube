@@ -144,9 +144,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: _getStatusColor(download.status),
+                backgroundColor: _getStatusColor(download.status.name),
                 child: Icon(
-                  _getStatusIcon(download.status),
+                  _getStatusIcon(download.status.name),
                   color: Colors.white,
                 ),
               ),

@@ -196,7 +196,7 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
         final combinedResult = SearchResult(
           downloads: combinedDownloads,
-          total: newResult.total,
+          totalCount: newResult.totalCount,
           page: newResult.page,
           pageSize: newResult.pageSize,
           hasMore: newResult.hasMore,

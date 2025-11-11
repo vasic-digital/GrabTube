@@ -13,7 +13,7 @@ abstract class ApiClient {
 
   /// Add a new download to the queue
   @POST('/add')
-  Future<Map<String, dynamic>> addDownload({
+  Future<dynamic> addDownload({
     @Field('url') required String url,
     @Field('quality') String? quality,
     @Field('format') String? format,
@@ -23,7 +23,7 @@ abstract class ApiClient {
 
   /// Get all downloads (queue + done)
   @GET('/downloads')
-  Future<Map<String, dynamic>> getDownloads();
+  Future<dynamic> getDownloads();
 
   /// Get download queue
   @GET('/queue')
@@ -39,14 +39,14 @@ abstract class ApiClient {
 
   /// Delete a download
   @POST('/delete')
-  Future<Map<String, dynamic>> deleteDownload({
+  Future<dynamic> deleteDownload({
     @Field('ids') required List<String> ids,
     @Field('where') String where = 'queue',
   });
 
   /// Start a download
   @POST('/start')
-  Future<Map<String, dynamic>> startDownload({
+  Future<dynamic> startDownload({
     @Field('ids') required List<String> ids,
   });
 
@@ -56,7 +56,7 @@ abstract class ApiClient {
 
   /// Re-download from history
   @POST('/redownload')
-  Future<Map<String, dynamic>> redownload({
+  Future<dynamic> redownload({
     @Field('url') required String url,
     @Field('quality') String? quality,
     @Field('format') String? format,
@@ -69,15 +69,15 @@ abstract class ApiClient {
 
   /// Clear completed downloads
   @POST('/clear')
-  Future<Map<String, dynamic>> clearCompleted();
+  Future<dynamic> clearCompleted();
 
   /// Get video info
   @GET('/info')
-  Future<Map<String, dynamic>> getVideoInfo({
+  Future<dynamic> getVideoInfo({
     @Query('url') required String url,
   });
 
   /// Check server health
   @GET('/health')
-  Future<Map<String, dynamic>> checkHealth();
+  Future<dynamic> checkHealth();
 }

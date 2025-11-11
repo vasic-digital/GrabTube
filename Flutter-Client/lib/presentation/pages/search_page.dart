@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/search_parameters.dart';
+import '../../domain/entities/search_result.dart';
 import '../blocs/search/search_bloc.dart';
 import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
@@ -188,7 +189,7 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _buildResultsList(BuildContext context, dynamic result) {
+  Widget _buildResultsList(BuildContext context, SearchResult result) {
     return ListView.builder(
       controller: _scrollController,
       itemCount: result.downloads.length + (result.hasMore ? 1 : 0),
@@ -205,9 +206,9 @@ class _SearchPageState extends State<SearchPage> {
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: _getStatusColor(download.status),
+              backgroundColor: _getStatusColor(download.status.name),
               child: Icon(
-                _getStatusIcon(download.status),
+                _getStatusIcon(download.status.name),
                 color: Colors.white,
               ),
             ),

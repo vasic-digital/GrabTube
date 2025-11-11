@@ -55,7 +55,7 @@ class GrabTubeProgressIndicator extends StatelessWidget {
               values: [
                 ValueDelegate.position(
                   const ['**'],
-                  value: clampedProgress,
+                  value: Offset(0, clampedProgress * 100),
                 ),
               ],
             ),
