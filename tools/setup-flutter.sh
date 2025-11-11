@@ -164,9 +164,14 @@ download_flutter() {
         ARCHIVE_FILE="flutter.tar.xz"
     fi
 
-    # Download with progress
-    curl -L -o "$ARCHIVE_FILE" "$FLUTTER_URL" || {
+    # Download with progress using wget (supports resume)
+    # -c: continue/resume download
+    # --tries=10: retry up to 10 times
+    # --timeout=30: 30 second timeout for each attempt
+    # --show-progress: display progress bar
+    wget -c --tries=10 --timeout=30 --show-progress -O "$ARCHIVE_FILE" "$FLUTTER_URL" || {
         log_error "Failed to download Flutter from $FLUTTER_URL"
+        log_info "If download was interrupted, run the script again to resume."
         exit 1
     }
 
