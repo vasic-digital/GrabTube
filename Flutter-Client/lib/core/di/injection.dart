@@ -94,7 +94,7 @@ Future<void> configureDependencies() async {
   getIt.registerSingleton<Dio>(
     Dio(
       BaseOptions(
-        baseUrl: sharedPreferences.getString('server_url') ?? 'http://localhost:8080',
+        baseUrl: sharedPreferences.getString('server_url') ?? 'http://localhost:8081',
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
       ),
