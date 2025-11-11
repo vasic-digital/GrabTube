@@ -6,6 +6,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dio/dio.dart';
 import '../../domain/entities/download.dart';
 import '../../domain/repositories/favorites_repository.dart';
+import '../../domain/usecases/favorites/sync_favorites_usecase.dart';
+import '../../core/services/favorites_sync_service.dart';
 import '../models/download_model.dart';
 
 /// Implementation of FavoritesRepository using API client and Hive
@@ -14,10 +16,12 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
   FavoritesRepositoryImpl(
     this._dio,
     this._favoritesBox,
+    this._syncService,
   );
 
   final Dio _dio;
   final Box<String> _favoritesBox;
+  final FavoritesSyncService _syncService;
 
   final _favoritesController = StreamController<List<Download>>.broadcast();
 
@@ -162,6 +166,17 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
       await _notifyFavoritesChanged();
     } catch (e) {
       throw Exception('Failed to import favorites: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<SyncResult> syncFavorites() async {
+    try {
+      final result = await _syncService.performSync();
+      await _notifyFavoritesChanged();
+      return result;
+    } catch (e) {
+      throw Exception('Failed to sync favorites: ${e.toString()}');
     }
   }
 

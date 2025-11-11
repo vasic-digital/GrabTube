@@ -1,67 +1,34 @@
-import '../entities/schedule.dart';
-import '../entities/scheduled_download.dart';
+import '../entities/download_schedule.dart';
 
 /// Repository interface for schedule operations
 abstract class ScheduleRepository {
-  /// Create a new schedule
-  Future<Schedule> createSchedule(Schedule schedule);
-
-  /// Update an existing schedule
-  Future<Schedule> updateSchedule(Schedule schedule);
-
-  /// Delete a schedule
-  Future<void> deleteSchedule(String scheduleId);
+  /// Get all schedules
+  Future<List<DownloadSchedule>> getSchedules();
 
   /// Get schedule by ID
-  Future<Schedule?> getScheduleById(String scheduleId);
+  Future<DownloadSchedule?> getSchedule(String id);
 
-  /// Get all schedules
-  Future<List<Schedule>> getAllSchedules();
+  /// Get pending schedules
+  Future<List<DownloadSchedule>> getPendingSchedules();
 
-  /// Get active schedules
-  Future<List<Schedule>> getActiveSchedules();
+  /// Get due schedules (ready to execute)
+  Future<List<DownloadSchedule>> getDueSchedules();
 
-  /// Get schedules by type
-  Future<List<Schedule>> getSchedulesByType(ScheduleType type);
+  /// Create a new schedule
+  Future<DownloadSchedule> createSchedule(DownloadSchedule schedule);
 
-  /// Enable/disable a schedule
-  Future<void> toggleSchedule(String scheduleId, bool isActive);
+  /// Update schedule
+  Future<void> updateSchedule(DownloadSchedule schedule);
 
-  /// Get schedules that should execute now
-  Future<List<Schedule>> getSchedulesToExecute();
+  /// Delete schedule
+  Future<void> deleteSchedule(String id);
 
-  /// Mark schedule as executed
-  Future<void> markScheduleExecuted(
-    String scheduleId,
-    DateTime executedAt,
-  );
+  /// Cancel schedule
+  Future<void> cancelSchedule(String id);
 
-  /// Create a scheduled download instance
-  Future<ScheduledDownload> createScheduledDownload(
-    ScheduledDownload scheduledDownload,
-  );
-
-  /// Update scheduled download status
-  Future<void> updateScheduledDownload(ScheduledDownload scheduledDownload);
-
-  /// Get scheduled downloads for a schedule
-  Future<List<ScheduledDownload>> getScheduledDownloads(String scheduleId);
-
-  /// Get all scheduled downloads
-  Future<List<ScheduledDownload>> getAllScheduledDownloads();
-
-  /// Get pending scheduled downloads
-  Future<List<ScheduledDownload>> getPendingScheduledDownloads();
-
-  /// Get completed scheduled downloads
-  Future<List<ScheduledDownload>> getCompletedScheduledDownloads();
-
-  /// Delete scheduled download
-  Future<void> deleteScheduledDownload(String scheduledDownloadId);
+  /// Execute schedule (manually trigger)
+  Future<void> executeSchedule(String id);
 
   /// Stream of schedule updates
-  Stream<Schedule> get scheduleUpdates;
-
-  /// Stream of scheduled download updates
-  Stream<ScheduledDownload> get scheduledDownloadUpdates;
+  Stream<List<DownloadSchedule>> get scheduleUpdates;
 }

@@ -139,3 +139,38 @@ class FavoriteIdsLoaded extends FavoritesState {
   @override
   List<Object?> get props => [favoriteIds];
 }
+
+/// State when syncing favorites
+class FavoritesSyncing extends FavoritesState {
+  const FavoritesSyncing();
+}
+
+/// State when favorites are synced successfully
+class FavoritesSynced extends FavoritesState {
+  const FavoritesSynced(this.syncResult);
+
+  final String syncResult; // Human-readable sync result
+
+  @override
+  List<Object?> get props => [syncResult];
+}
+
+/// State when QR code is generated
+class QRCodeGenerated extends FavoritesState {
+  const QRCodeGenerated(this.qrData);
+
+  final String qrData;
+
+  @override
+  List<Object?> get props => [qrData];
+}
+
+/// State when favorites are imported from QR code
+class FavoritesImportedFromQR extends FavoritesState {
+  const FavoritesImportedFromQR(this.importedCount);
+
+  final int importedCount;
+
+  @override
+  List<Object?> get props => [importedCount];
+}

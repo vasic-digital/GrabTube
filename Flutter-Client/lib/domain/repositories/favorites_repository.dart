@@ -1,4 +1,5 @@
 import '../entities/download.dart';
+import '../usecases/favorites/sync_favorites_usecase.dart';
 
 /// Repository interface for favorites operations
 abstract class FavoritesRepository {
@@ -28,6 +29,9 @@ abstract class FavoritesRepository {
 
   /// Import favorites from file
   Future<void> importFavorites(String filePath);
+
+  /// Sync favorites across devices
+  Future<SyncResult> syncFavorites();
 
   /// Stream of favorites updates
   Stream<List<Download>> get favoritesUpdates;

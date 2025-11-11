@@ -82,3 +82,23 @@ class GetFavoriteIdsEvent extends FavoritesEvent {
 class FavoritesUpdatedEvent extends FavoritesEvent {
   const FavoritesUpdatedEvent();
 }
+
+/// Event to sync favorites across devices
+class SyncFavoritesEvent extends FavoritesEvent {
+  const SyncFavoritesEvent();
+}
+
+/// Event to generate QR code for sharing favorites
+class GenerateQRCodeEvent extends FavoritesEvent {
+  const GenerateQRCodeEvent();
+}
+
+/// Event to import favorites from QR code
+class ImportFromQRCodeEvent extends FavoritesEvent {
+  const ImportFromQRCodeEvent(this.qrData);
+
+  final String qrData;
+
+  @override
+  List<Object?> get props => [qrData];
+}

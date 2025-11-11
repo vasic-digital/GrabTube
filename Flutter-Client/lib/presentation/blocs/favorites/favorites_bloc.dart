@@ -6,7 +6,9 @@ import '../../../domain/usecases/favorites/get_favorites_usecase.dart';
 import '../../../domain/usecases/favorites/add_favorite_usecase.dart';
 import '../../../domain/usecases/favorites/remove_favorite_usecase.dart';
 import '../../../domain/usecases/favorites/toggle_favorite_usecase.dart';
+import '../../../domain/usecases/favorites/sync_favorites_usecase.dart';
 import '../../../domain/repositories/favorites_repository.dart';
+import '../../../core/services/favorites_sync_service.dart';
 import 'favorites_event.dart';
 import 'favorites_state.dart';
 
@@ -18,7 +20,9 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     this._addFavoriteUseCase,
     this._removeFavoriteUseCase,
     this._toggleFavoriteUseCase,
+    this._syncFavoritesUseCase,
     this._repository,
+    this._syncService,
   ) : super(const FavoritesInitial()) {
     on<LoadFavoritesEvent>(_onLoadFavorites);
     on<AddFavoriteEvent>(_onAddFavorite);
@@ -30,6 +34,9 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     on<ImportFavoritesEvent>(_onImportFavorites);
     on<GetFavoriteIdsEvent>(_onGetFavoriteIds);
     on<FavoritesUpdatedEvent>(_onFavoritesUpdated);
+    on<SyncFavoritesEvent>(_onSyncFavorites);
+    on<GenerateQRCodeEvent>(_onGenerateQRCode);
+    on<ImportFromQRCodeEvent>(_onImportFromQRCode);
 
     // Subscribe to favorites updates stream
     _favoritesSubscription = _repository.favoritesUpdates.listen((favorites) {
@@ -41,7 +48,9 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   final AddFavoriteUseCase _addFavoriteUseCase;
   final RemoveFavoriteUseCase _removeFavoriteUseCase;
   final ToggleFavoriteUseCase _toggleFavoriteUseCase;
+  final SyncFavoritesUseCase _syncFavoritesUseCase;
   final FavoritesRepository _repository;
+  final FavoritesSyncService _syncService;
 
   StreamSubscription<List<Download>>? _favoritesSubscription;
 
@@ -189,6 +198,52 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   ) async {
     // Reload favorites when stream notifies of updates
     add(const LoadFavoritesEvent());
+  }
+
+  Future<void> _onSyncFavorites(
+    SyncFavoritesEvent event,
+    Emitter<FavoritesState> emit,
+  ) async {
+    emit(const FavoritesSyncing());
+
+    final result = await _syncFavoritesUseCase();
+
+    result.fold(
+      (error) => emit(FavoritesFailure(error)),
+      (syncResult) {
+        final message = syncResult.addedCount > 0
+            ? 'Synced! Added ${syncResult.addedCount} favorites from cloud.'
+            : 'Synced! Everything up to date.';
+
+        emit(FavoritesSynced(message));
+        add(const LoadFavoritesEvent());
+      },
+    );
+  }
+
+  Future<void> _onGenerateQRCode(
+    GenerateQRCodeEvent event,
+    Emitter<FavoritesState> emit,
+  ) async {
+    try {
+      final qrData = await _syncService.generateQRCodeData();
+      emit(QRCodeGenerated(qrData));
+    } catch (e) {
+      emit(FavoritesFailure('Failed to generate QR code: ${e.toString()}'));
+    }
+  }
+
+  Future<void> _onImportFromQRCode(
+    ImportFromQRCodeEvent event,
+    Emitter<FavoritesState> emit,
+  ) async {
+    try {
+      final importedCount = await _syncService.importFromQRCode(event.qrData);
+      emit(FavoritesImportedFromQR(importedCount));
+      add(const LoadFavoritesEvent());
+    } catch (e) {
+      emit(FavoritesFailure('Failed to import from QR code: ${e.toString()}'));
+    }
   }
 
   @override
