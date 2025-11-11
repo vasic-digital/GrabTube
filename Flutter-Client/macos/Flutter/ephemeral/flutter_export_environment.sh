@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/home/milosvasic/Projects/GrabTube/Flutter-Client/.flutter/sdk"
-export "FLUTTER_APPLICATION_PATH=/home/milosvasic/Projects/GrabTube/Flutter-Client"
+export "FLUTTER_ROOT=/Volumes/T7/Projects/GrabTube/tools/flutter-sdk"
+export "FLUTTER_APPLICATION_PATH=/Volumes/T7/Projects/GrabTube/Flutter-Client"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=1.0.0"

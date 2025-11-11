@@ -3,6 +3,18 @@ import '../../domain/entities/download.dart';
 
 part 'download_model.g.dart';
 
+/// Custom converter to handle timestamp as either int (nanoseconds) or String (ISO 8601)
+String? _timestampFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is String) return value;
+  if (value is int) {
+    // Convert nanosecond timestamp to DateTime, then to ISO 8601 string
+    final dateTime = DateTime.fromMicrosecondsSinceEpoch(value ~/ 1000);
+    return dateTime.toIso8601String();
+  }
+  return null;
+}
+
 @JsonSerializable()
 class DownloadModel {
   DownloadModel({
@@ -53,6 +65,7 @@ class DownloadModel {
   @JsonKey(name: 'downloaded_bytes')
   final int? downloadedSize;
   final String? error;
+  @JsonKey(fromJson: _timestampFromJson)
   final String? timestamp;
 
   // Rich metadata fields

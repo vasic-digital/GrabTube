@@ -22,7 +22,7 @@ DownloadModel _$DownloadModelFromJson(Map<String, dynamic> json) =>
       fileSize: (json['total_bytes'] as num?)?.toInt(),
       downloadedSize: (json['downloaded_bytes'] as num?)?.toInt(),
       error: json['error'] as String?,
-      timestamp: json['timestamp'] as String?,
+      timestamp: _timestampFromJson(json['timestamp']),
       description: json['description'] as String?,
       duration: (json['duration'] as num?)?.toInt(),
       uploader: json['uploader'] as String?,
