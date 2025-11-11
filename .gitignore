@@ -698,3 +698,71 @@ nbdist/
 *.orig
 *.patch
 *.diff
+
+# =============================================================================
+# GrabTube Local Dependencies (Auto-downloaded by setup scripts)
+# =============================================================================
+# These dependencies are automatically downloaded and configured
+# Run: ./setup.sh to initialize all dependencies
+
+# Python backend dependencies
+Web-Client/.venv/
+Web-Client/requirements.txt
+Web-Client/activate-venv.sh
+
+# ffmpeg binaries (downloaded locally)
+Web-Client/tools/ffmpeg/
+Web-Client/tools/ffmpeg-wrapper.sh
+Web-Client/tools/ffprobe-wrapper.sh
+Web-Client/tools/ffmpeg-env.sh
+Web-Client/tools/configure-backend.sh
+
+# Backend placeholder UI
+Web-Client/ui/dist/
+
+# Backend runtime data
+Web-Client/.metube/
+Web-Client/downloads/
+
+# Project convenience scripts (auto-generated)
+run-backend.sh
+run-flutter-web.sh
+run-all.sh
+activate-venv.sh
+
+# Flutter generated files
+Flutter-Client/.flutter-plugins
+Flutter-Client/.flutter-plugins-dependencies
+Flutter-Client/pubspec.lock.backup
+# ═══════════════════════════════════════════════════
+# Local Dependencies (automatically downloaded)
+# ═══════════════════════════════════════════════════
+
+# Python virtual environment
+Web-Client/.venv/
+Web-Client/requirements.txt
+Web-Client/activate-venv.sh
+
+# ffmpeg binaries (automatically downloaded)
+Web-Client/tools/ffmpeg/
+Web-Client/tools/ffmpeg-wrapper.sh
+Web-Client/tools/ffprobe-wrapper.sh
+Web-Client/tools/ffmpeg-env.sh
+
+# Flutter SDK (automatically downloaded)
+tools/flutter-sdk/
+tools/.flutter-version
+
+# Placeholder UI
+Web-Client/ui/dist/
+
+# Runtime data
+Web-Client/.metube/
+*.pyc
+__pycache__/
+
+# Run scripts
+run-backend.sh
+run-flutter-web.sh
+run-all.sh
+
