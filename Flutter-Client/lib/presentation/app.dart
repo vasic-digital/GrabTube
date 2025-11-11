@@ -9,6 +9,8 @@ import 'blocs/qr_scanner/qr_scanner_bloc.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/favorites/favorites_bloc.dart';
 import 'blocs/schedule/schedule_bloc.dart';
+import 'blocs/settings/settings_bloc.dart';
+import 'blocs/settings/settings_event.dart';
 import 'pages/home_page.dart';
 
 class GrabTubeApp extends StatelessWidget {
@@ -35,6 +37,9 @@ class GrabTubeApp extends StatelessWidget {
         ),
         BlocProvider<ScheduleBloc>(
           create: (_) => getIt<ScheduleBloc>(),
+        ),
+        BlocProvider<SettingsBloc>(
+          create: (_) => getIt<SettingsBloc>()..add(const LoadSettings()),
         ),
       ],
       child: MaterialApp(

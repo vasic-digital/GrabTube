@@ -130,6 +130,39 @@ class _HomePageState extends State<HomePage>
               );
             },
           ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            tooltip: 'More options',
+            onSelected: (value) {
+              if (value == 'import_dlc') {
+                _importDLC(context);
+              } else if (value == 'export_dlc') {
+                _exportDLC(context);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'import_dlc',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_upload),
+                    SizedBox(width: 12),
+                    Text('Import DLC File'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'export_dlc',
+                child: Row(
+                  children: [
+                    Icon(Icons.file_download),
+                    SizedBox(width: 12),
+                    Text('Export to DLC'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -374,6 +407,126 @@ class _HomePageState extends State<HomePage>
         child: AddDownloadDialog(initialUrl: url),
       ),
     );
+  }
+
+  Future<void> _importDLC(BuildContext context) async {
+    try {
+      // Pick DLC file
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['dlc'],
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      final content = file.bytes != null
+          ? String.fromCharCodes(file.bytes!)
+          : await File(file.path!).readAsString();
+
+      // Parse DLC
+      final dlcService = getIt<DLCService>();
+      final dlcResult = await dlcService.parseDLC(content);
+
+      if (!mounted) return;
+
+      if (dlcResult.success && dlcResult.links.isNotEmpty) {
+        // Add all URLs to download queue
+        for (final link in dlcResult.links) {
+          context.read<DownloadBloc>().add(
+                AddDownload(
+                  url: link.url,
+                  quality: 'best',
+                ),
+              );
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Imported ${dlcResult.links.length} downloads from ${dlcResult.packageName ?? "DLC file"}',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to import DLC: ${dlcResult.error ?? "Unknown error"}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error importing DLC: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _exportDLC(BuildContext context) async {
+    try {
+      final state = context.read<DownloadBloc>().state;
+
+      if (state is! DownloadLoaded) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No downloads available')),
+        );
+        return;
+      }
+
+      // Get all URLs from queue and pending
+      final allDownloads = [...state.queue, ...state.pending];
+      final urls = allDownloads.map((d) => d.url).toList();
+
+      if (urls.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No downloads to export')),
+        );
+        return;
+      }
+
+      // Generate DLC
+      final dlcService = getIt<DLCService>();
+      final dlcContent = await dlcService.generateDLC(
+        urls: urls,
+        packageName: 'GrabTube Export ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}',
+        filenames: allDownloads.map((d) => d.filename ?? 'download').toList(),
+      );
+
+      // Save to temporary file
+      final dir = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final file = File('${dir.path}/grabtube_export_$timestamp.dlc');
+      await file.writeAsString(dlcContent);
+
+      // Share the file
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'GrabTube Downloads Export (${urls.length} items)',
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Exported ${urls.length} downloads to DLC'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error exporting DLC: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    }
   }
 
   Widget _buildNavigationDrawer(BuildContext context) {
