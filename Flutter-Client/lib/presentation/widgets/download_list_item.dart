@@ -33,7 +33,7 @@ class DownloadListItem extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Thumbnail
+                  // Thumbnail with shimmer loading effect
                   if (download.thumbnail != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
@@ -42,12 +42,12 @@ class DownloadListItem extends StatelessWidget {
                         width: 120,
                         height: 68,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
+                        placeholder: (context, url) => ShimmerLoading(
                           width: 120,
                           height: 68,
-                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          borderRadius: 8,
                           child: const Center(
-                            child: CircularProgressIndicator(),
+                            child: Icon(Icons.image, color: Colors.white54),
                           ),
                         ),
                         errorWidget: (context, url, error) => Container(
@@ -149,23 +149,25 @@ class DownloadListItem extends StatelessWidget {
                 ],
               ),
 
-              // Progress bar
+              // Progress bar with smooth animations
               if (download.isActive) ...[
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    // Animated arrow progress indicator
+                    // Animated arrow progress indicator with pulsing effect
                     GrabTubeProgressIndicator(
                       progress: download.progress ?? 0.0,
                       size: 32,
+                      isAnimating: download.status == DownloadStatus.downloading,
                     ),
                     const SizedBox(width: 12),
-                    // Linear progress bar with percentage
+                    // Linear progress bar with shimmer effect and percentage
                     Expanded(
                       child: GrabTubeLinearProgress(
                         progress: download.progress ?? 0.0,
                         height: 8,
                         showPercentage: true,
+                        isAnimating: download.status == DownloadStatus.downloading,
                         label: download.fileSize != null
                             ? _formatBytes(download.fileSize!)
                             : null,
@@ -175,34 +177,44 @@ class DownloadListItem extends StatelessWidget {
                 ),
               ],
 
-              // Error message
+              // Error message with animated entrance
               if (download.hasError && download.error != null) ...[
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.onErrorContainer,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          download.error!,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onErrorContainer,
-                            fontSize: 12,
-                          ),
+                TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.elasticOut,
+                  tween: Tween<double>(begin: 0.8, end: 1.0),
+                  builder: (context, scale, child) {
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.errorContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 16,
+                              color: Theme.of(context).colorScheme.onErrorContainer,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                download.error!,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onErrorContainer,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
             ],
