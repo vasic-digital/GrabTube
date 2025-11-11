@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -647,25 +648,39 @@ class _SettingsPageState extends State<SettingsPage> {
       final file = File(result.files.single.path!);
       final content = await file.readAsString();
 
-      // Simple JSON parsing (in production, use dart:convert)
-      // For now, show a dialog with the content
+      // Parse and validate JSON
+      Map<String, dynamic> importedSettings;
+      try {
+        importedSettings = json.decode(content) as Map<String, dynamic>;
+      } catch (e) {
+        throw Exception('Invalid JSON format');
+      }
+
+      // Validate settings structure
+      final validation = _validateSettings(importedSettings);
+      if (!validation.isValid) {
+        throw Exception('Invalid settings: ${validation.errors.join(', ')}');
+      }
+
+      // Show preview dialog
       if (mounted) {
-        showDialog(
+        final confirmed = await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Import Settings'),
-            content: const Text(
-              'Settings import will be processed.\n\n'
-              'Note: This is a placeholder. Full JSON parsing will be implemented.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
+          builder: (context) => _buildImportPreviewDialog(importedSettings, validation),
         );
+
+        if (confirmed == true && mounted) {
+          // Import settings via BLoC
+          context.read<SettingsBloc>().add(ImportSettings(importedSettings));
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Settings imported successfully'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -673,10 +688,183 @@ class _SettingsPageState extends State<SettingsPage> {
           SnackBar(
             content: Text('Import failed: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
     }
+  }
+
+  /// Validate imported settings structure and values
+  _ValidationResult _validateSettings(Map<String, dynamic> settings) {
+    final errors = <String>[];
+    final warnings = <String>[];
+
+    // Expected keys with their types
+    final expectedKeys = {
+      'theme_mode': String,
+      'default_quality': String,
+      'default_format': String,
+      'auto_start_downloads': bool,
+      'show_thumbnails': bool,
+      'notifications_enabled': bool,
+      'compact_mode': bool,
+      'max_concurrent_downloads': int,
+      'connection_timeout': int,
+      'auto_retry_failed': bool,
+      'max_retry_attempts': int,
+      'wifi_only_downloads': bool,
+      'schedule_notifications_enabled': bool,
+      'default_schedule_time': String,
+      'show_completed_notification': bool,
+      'play_sound_on_complete': bool,
+      'vibrate_on_complete': bool,
+    };
+
+    // Check for required keys
+    for (final entry in expectedKeys.entries) {
+      if (!settings.containsKey(entry.key)) {
+        warnings.add('Missing key: ${entry.key}');
+        continue;
+      }
+
+      // Validate type
+      final value = settings[entry.key];
+      if (value.runtimeType != entry.value) {
+        errors.add('Invalid type for ${entry.key}: expected ${entry.value}, got ${value.runtimeType}');
+      }
+    }
+
+    // Validate specific values
+    if (settings.containsKey('theme_mode')) {
+      final themeMode = settings['theme_mode'];
+      if (themeMode is String && !['light', 'dark', 'system'].contains(themeMode)) {
+        errors.add('Invalid theme_mode: $themeMode');
+      }
+    }
+
+    if (settings.containsKey('max_concurrent_downloads')) {
+      final maxDownloads = settings['max_concurrent_downloads'];
+      if (maxDownloads is int && (maxDownloads < 1 || maxDownloads > 10)) {
+        errors.add('max_concurrent_downloads must be between 1 and 10');
+      }
+    }
+
+    if (settings.containsKey('connection_timeout')) {
+      final timeout = settings['connection_timeout'];
+      if (timeout is int && (timeout < 10 || timeout > 300)) {
+        errors.add('connection_timeout must be between 10 and 300 seconds');
+      }
+    }
+
+    if (settings.containsKey('max_retry_attempts')) {
+      final retries = settings['max_retry_attempts'];
+      if (retries is int && (retries < 0 || retries > 10)) {
+        errors.add('max_retry_attempts must be between 0 and 10');
+      }
+    }
+
+    return _ValidationResult(
+      isValid: errors.isEmpty,
+      errors: errors,
+      warnings: warnings,
+      validSettings: errors.isEmpty ? settings : {},
+    );
+  }
+
+  /// Build import preview dialog
+  Widget _buildImportPreviewDialog(Map<String, dynamic> settings, _ValidationResult validation) {
+    return AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.preview, size: 24),
+          SizedBox(width: 12),
+          Text('Import Settings Preview'),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (validation.warnings.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.warning, size: 20, color: Colors.orange),
+                        SizedBox(width: 8),
+                        Text('Warnings', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ...validation.warnings.map((w) => Padding(
+                      padding: const EdgeInsets.only(left: 28, top: 4),
+                      child: Text('• $w', style: const TextStyle(fontSize: 12)),
+                    )),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            Text(
+              'The following ${settings.length} settings will be imported:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                children: settings.entries.map((entry) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle, size: 16, color: Colors.green),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '${entry.key.replaceAll('_', ' ')}',
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                        Text(
+                          '${entry.value}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Import'),
+        ),
+      ],
+    );
   }
 
   Future<void> _resetSettings() async {
@@ -777,4 +965,19 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+}
+
+/// Validation result class for settings import
+class _ValidationResult {
+  const _ValidationResult({
+    required this.isValid,
+    required this.errors,
+    required this.warnings,
+    required this.validSettings,
+  });
+
+  final bool isValid;
+  final List<String> errors;
+  final List<String> warnings;
+  final Map<String, dynamic> validSettings;
 }
