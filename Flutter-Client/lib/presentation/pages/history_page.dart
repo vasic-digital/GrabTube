@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/entities/download.dart';
 import '../blocs/download/download_bloc.dart';
@@ -384,11 +385,17 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  void _openOriginalUrl(Download download) {
-    // TODO: Implement URL opening using url_launcher package
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Open: ${download.webpageUrl ?? download.url}')),
-    );
+  void _openOriginalUrl(Download download) async {
+    final uri = Uri.parse(download.url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch ${download.url}')),
+        );
+      }
+    }
   }
 
   void _toggleFavorite(Download download) async {

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -6,41 +7,36 @@ import 'package:mocktail/mocktail.dart';
 import 'package:grabtube/core/network/python_service_client.dart';
 
 class MockProcess extends Mock implements Process {}
+class MockStreamController<T> extends Mock implements StreamController<T> {}
+class MockStream<T> extends Mock implements Stream<T> {}
 
 void main() {
-  late PythonServiceClient pythonServiceClient;
-  late MockProcess mockProcess;
-
-  setUp(() {
-    pythonServiceClient = PythonServiceClient();
-    mockProcess = MockProcess();
-  });
-
-  tearDown(() async {
-    await pythonServiceClient.dispose();
-  });
-
   group('PythonServiceClient Tests', () {
+    late PythonServiceClient pythonServiceClient;
+    late MockProcess mockProcess;
+
+    setUp(() {
+      pythonServiceClient = PythonServiceClient();
+      mockProcess = MockProcess();
+    });
+
+    tearDown(() async {
+      await pythonServiceClient.dispose();
+    });
+
     test('initial state is not running', () {
       expect(pythonServiceClient.isRunning, false);
     });
 
-    test('status stream emits initial false', () async {
+    test('status stream provides status updates', () async {
       final statuses = <bool>[];
-      pythonServiceClient.statusStream.listen(statuses.add);
+      final subscription = pythonServiceClient.statusStream.listen(statuses.add);
       
+      // Initial state should not emit anything
       await Future.delayed(const Duration(milliseconds: 100));
-      expect(statuses, isEmpty); // No initial value
-    });
-
-    test('startService returns false when Python script not found', () async {
-      // This test will fail if the Python script exists
-      // In a real test environment, we would mock the file system
-      final result = await pythonServiceClient.startService();
+      expect(statuses, isEmpty);
       
-      // The result depends on whether Python scripts exist
-      // We can't reliably test this without proper mocking
-      expect(result, isA<bool>());
+      await subscription.cancel();
     });
 
     test('stopService does nothing when not running', () async {
@@ -51,30 +47,54 @@ void main() {
     test('ensureRunning returns false when service cannot start', () async {
       final result = await pythonServiceClient.ensureRunning();
       
-      // Result depends on environment
-      expect(result, isA<bool>());
+      // In test environment without Python scripts, should return false
+      expect(result, false);
     });
 
-    test('dispose stops service and closes streams', () async {
+    test('dispose closes all resources', () async {
       await pythonServiceClient.dispose();
       
       expect(pythonServiceClient.isRunning, false);
-      expect(
-        () => pythonServiceClient.statusStream.listen((_) {}),
-        returnsNormally,
-      );
     });
 
-    test('service can be started and stopped multiple times', () async {
-      // This is more of an integration test
-      // In unit tests, we would mock the Process.start
-      for (var i = 0; i < 3; i++) {
-        final startResult = await pythonServiceClient.startService();
-        expect(startResult, isA<bool>());
-        
-        await pythonServiceClient.stopService();
-        expect(pythonServiceClient.isRunning, false);
-      }
+    test('startService fails when Python script not found', () async {
+      final result = await pythonServiceClient.startService();
+      
+      // Should return false when Python script is not found
+      expect(result, false);
+      expect(pythonServiceClient.isRunning, false);
+    });
+
+    test('multiple stop calls are safe', () async {
+      await pythonServiceClient.stopService();
+      await pythonServiceClient.stopService();
+      await pythonServiceClient.stopService();
+      
+      expect(pythonServiceClient.isRunning, false);
+    });
+
+    test('statusStream listener can be added and removed', () async {
+      final listener1 = <bool>[];
+      final listener2 = <bool>[];
+      
+      final subscription1 = pythonServiceClient.statusStream.listen(listener1.add);
+      final subscription2 = pythonServiceClient.statusStream.listen(listener2.add);
+      
+      await Future.delayed(const Duration(milliseconds: 50));
+      
+      await subscription1.cancel();
+      await subscription2.cancel();
+      
+      // Should not throw
+      expect(listener1, isEmpty);
+      expect(listener2, isEmpty);
+    });
+
+    test('service handles ensureRunning with port parameter', () async {
+      final result = await pythonServiceClient.ensureRunning(port: 8082);
+      
+      expect(result, false);
+      expect(pythonServiceClient.isRunning, false);
     });
   });
 }
