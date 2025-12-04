@@ -9,6 +9,8 @@ import '../network/socket_client.dart';
 import '../network/python_service_client.dart';
 import '../network/native_python_bridge.dart';
 import '../network/jdownloader_api_client.dart';
+import '../services/settings_service.dart';
+import '../services/favorites_sync_service.dart';
 
 // Domain - Repositories
 import '../../domain/repositories/download_repository.dart';
@@ -37,6 +39,9 @@ import '../../data/models/search_parameters_model.dart';
 // Domain - Use Cases - Download
 import '../../domain/usecases/download/add_download_usecase.dart';
 import '../../domain/usecases/download/delete_download_usecase.dart';
+
+// Domain - Use Cases - Favorites
+import '../../domain/usecases/favorites/sync_favorites_usecase.dart';
 import '../../domain/usecases/download/get_download_history_usecase.dart';
 import '../../domain/usecases/download/get_downloads_usecase.dart';
 import '../../domain/usecases/download/start_download_usecase.dart';
@@ -63,6 +68,7 @@ import '../../domain/usecases/schedule/update_schedule_usecase.dart';
 import '../../domain/usecases/schedule/delete_schedule_usecase.dart';
 import '../../domain/usecases/schedule/get_schedules_usecase.dart';
 import '../../domain/usecases/schedule/get_schedule_by_id_usecase.dart';
+import '../../domain/usecases/schedule/execute_schedule_usecase.dart';
 
 // Domain - Use Cases - JDownloader
 import '../../domain/usecases/jdownloader/connect_jdownloader_usecase.dart';
@@ -79,6 +85,7 @@ import '../../presentation/blocs/search/search_bloc.dart';
 import '../../presentation/blocs/favorites/favorites_bloc.dart';
 import '../../presentation/blocs/schedule/schedule_bloc.dart';
 import '../../presentation/blocs/jdownloader/jdownloader_bloc.dart';
+import '../../presentation/blocs/settings/settings_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -115,17 +122,19 @@ Future<void> configureDependencies() async {
 
   // Register services
   getIt.registerLazySingleton<ApiClient>(() => ApiClient(getIt<Dio>(instanceName: 'main')));
-  getIt.registerLazySingleton<JDownloaderApiClient>(() => JDownloaderApiClient(getIt<Dio>(instanceName: 'jdownloader')));
+  // TODO: Fix retrofit generation issue
+  // getIt.registerLazySingleton<JDownloaderApiClient>(() => JDownloaderApiClient(getIt<Dio>(instanceName: 'jdownloader')));
   getIt.registerLazySingleton<SocketClient>(() => SocketClient(sharedPreferences));
   getIt.registerLazySingleton<PythonServiceClient>(() => PythonServiceClient());
   getIt.registerLazySingleton<NativePythonBridge>(() => NativePythonBridge());
+  getIt.registerLazySingleton<SettingsService>(() => SettingsServiceImpl(sharedPreferences));
 
   // Open Hive boxes (these will be used by repositories)
   // Note: Hive.initFlutter() is called in main.dart before this function
   final scanHistoryBox = await Hive.openBox<QRScanResultModel>('scan_history');
   final searchHistoryBox = await Hive.openBox<SearchParametersModel>('search_history');
   final favoritesBox = await Hive.openBox<String>('favorites');
-  final schedulesBox = await Hive.openBox<ScheduleModel>('schedules');
+  final schedulesBox = await Hive.openBox<String>('schedules');
   final scheduledDownloadsBox = await Hive.openBox<ScheduledDownloadModel>('scheduled_downloads');
   final jdownloaderInstancesBox = await Hive.openBox<JDownloaderInstanceModel>('jdownloader_instances');
   final speedDataBox = await Hive.openBox<SpeedDataPointModel>('speed_data');
@@ -134,7 +143,7 @@ Future<void> configureDependencies() async {
   getIt.registerSingleton<Box<QRScanResultModel>>(scanHistoryBox);
   getIt.registerSingleton<Box<SearchParametersModel>>(searchHistoryBox);
   getIt.registerSingleton<Box<String>>(favoritesBox);
-  getIt.registerSingleton<Box<ScheduleModel>>(schedulesBox);
+  getIt.registerSingleton<Box<String>>(schedulesBox);
   getIt.registerSingleton<Box<ScheduledDownloadModel>>(scheduledDownloadsBox);
   getIt.registerSingleton<Box<JDownloaderInstanceModel>>(jdownloaderInstancesBox);
   getIt.registerSingleton<Box<SpeedDataPointModel>>(speedDataBox);
@@ -155,7 +164,8 @@ Future<void> configureDependencies() async {
     ),
   );
 
-  getIt.registerLazySingleton<JDownloaderRepository>(
+  // TODO: Fix JDownloader after fixing retrofit generation
+  // getIt.registerLazySingleton<JDownloaderRepository>(
     () => JDownloaderRepositoryImpl(
       getIt<Dio>(instanceName: 'jdownloader'),
       getIt<Box<JDownloaderInstanceModel>>(),
@@ -173,14 +183,12 @@ Future<void> configureDependencies() async {
     () => FavoritesRepositoryImpl(
       getIt<Dio>(instanceName: 'main'),
       getIt<Box<String>>(),
+      getIt<FavoritesSyncService>(),
     ),
   );
 
   getIt.registerLazySingleton<ScheduleRepository>(
-    () => ScheduleRepositoryImpl(
-      getIt<Box<ScheduleModel>>(),
-      getIt<Box<ScheduledDownloadModel>>(),
-    ),
+    () => ScheduleRepositoryImpl(getIt<Box<String>>()),
   );
 
   // Register use cases - Download
@@ -252,17 +260,18 @@ Future<void> configureDependencies() async {
       getIt<AddFavoriteUseCase>(),
       getIt<RemoveFavoriteUseCase>(),
       getIt<ToggleFavoriteUseCase>(),
+      getIt<SyncFavoritesUseCase>(),
       getIt<FavoritesRepository>(),
+      getIt<FavoritesSyncService>(),
     ),
   );
 
   getIt.registerFactory(
     () => ScheduleBloc(
-      getIt<CreateScheduleUseCase>(),
-      getIt<UpdateScheduleUseCase>(),
-      getIt<DeleteScheduleUseCase>(),
       getIt<GetSchedulesUseCase>(),
-      getIt<GetScheduleByIdUseCase>(),
+      getIt<CreateScheduleUseCase>(),
+      getIt<DeleteScheduleUseCase>(),
+      getIt<ExecuteScheduleUseCase>(),
       getIt<ScheduleRepository>(),
     ),
   );
@@ -277,5 +286,9 @@ Future<void> configureDependencies() async {
       getIt<ResumeJDownloaderDownloadUseCase>(),
       getIt<JDownloaderRepository>(),
     ),
+  );
+
+  getIt.registerFactory(
+    () => SettingsBloc(getIt<SettingsService>()),
   );
 }

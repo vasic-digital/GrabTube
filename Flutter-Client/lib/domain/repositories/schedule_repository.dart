@@ -8,6 +8,9 @@ abstract class ScheduleRepository {
   /// Get schedule by ID
   Future<DownloadSchedule?> getSchedule(String id);
 
+  /// Get schedule by ID (alias for getSchedule)
+  Future<DownloadSchedule?> getScheduleById(String id);
+
   /// Get pending schedules
   Future<List<DownloadSchedule>> getPendingSchedules();
 

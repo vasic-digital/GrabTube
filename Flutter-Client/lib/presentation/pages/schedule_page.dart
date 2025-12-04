@@ -94,7 +94,7 @@ class _SchedulePageContentState extends State<_SchedulePageContent> {
           }
         },
         builder: (context, state) {
-          if (state is ScheduleLoading) {
+          if (state is SchedulesLoading) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -114,7 +114,7 @@ class _SchedulePageContentState extends State<_SchedulePageContent> {
             );
           }
 
-          if (state is ScheduleLoaded) {
+          if (state is SchedulesLoaded) {
             if (state.schedules.isEmpty) {
               return _buildEmptyState(context);
             }
@@ -123,7 +123,7 @@ class _SchedulePageContentState extends State<_SchedulePageContent> {
             final pendingSchedules = state.schedules
                 .where((s) => s.status == ScheduleStatus.pending)
                 .toList()
-              ..sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+              ..sort((a, b) => a.nextExecutionTime?.compareTo(b.nextExecutionTime ?? DateTime.now()) ?? 0);
 
             final executingSchedules = state.schedules
                 .where((s) => s.status == ScheduleStatus.executing)
@@ -133,8 +133,8 @@ class _SchedulePageContentState extends State<_SchedulePageContent> {
                 .where((s) => s.status == ScheduleStatus.completed)
                 .toList()
               ..sort((a, b) =>
-                  (b.completedAt ?? DateTime.now())
-                      .compareTo(a.completedAt ?? DateTime.now()));
+                  (b.lastExecutedAt ?? DateTime.now())
+                      .compareTo(a.lastExecutedAt ?? DateTime.now()));
 
             final failedSchedules = state.schedules
                 .where((s) => s.status == ScheduleStatus.failed)
@@ -279,7 +279,7 @@ class _ScheduleListItem extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: _buildStatusIcon(context),
         title: Text(
-          schedule.title ?? schedule.url,
+          schedule.url,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -297,12 +297,13 @@ class _ScheduleListItem extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             _buildScheduleInfo(context),
-            if (schedule.quality != null || schedule.format != null)
+            // TODO: Display quality/format when schedule supports them
+      if (false) // schedule.quality != null || schedule.format != null)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Row(
                   children: [
-                    if (schedule.quality != null)
+                    if (false) // schedule.quality != null
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
@@ -310,7 +311,7 @@ class _ScheduleListItem extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          schedule.quality!,
+                          'best', // schedule.quality!
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSecondaryContainer,
                           ),
@@ -326,7 +327,7 @@ class _ScheduleListItem extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
-                          schedule.format!.toUpperCase(),
+                          'mp4'.toUpperCase(), // schedule.format!.toUpperCase(),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onTertiaryContainer,
                           ),
@@ -420,6 +421,9 @@ class _ScheduleListItem extends StatelessWidget {
     // Pending status - show countdown
     final now = DateTime.now();
     final scheduledTime = schedule.scheduledTime;
+    if (scheduledTime == null) {
+      return const Text('Not scheduled', style: TextStyle(color: Colors.grey));
+    }
     final difference = scheduledTime.difference(now);
 
     String countdownText;
@@ -779,6 +783,7 @@ class _CreateScheduleDialogState extends State<_CreateScheduleDialog> {
       quality: _quality,
       format: _format,
       repeatInterval: _repeatInterval,
+      createdAt: DateTime.now(),
     );
 
     widget.onScheduleCreated(schedule);

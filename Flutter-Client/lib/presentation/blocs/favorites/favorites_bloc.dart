@@ -206,19 +206,18 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   ) async {
     emit(const FavoritesSyncing());
 
-    final result = await _syncFavoritesUseCase();
+    try {
+      final result = await _syncFavoritesUseCase();
+      
+      final message = result.syncedCount > 0
+          ? 'Synced! Added ${result.syncedCount} favorites from cloud.'
+          : 'Synced! Everything up to date.';
 
-    result.fold(
-      (error) => emit(FavoritesFailure(error)),
-      (syncResult) {
-        final message = syncResult.addedCount > 0
-            ? 'Synced! Added ${syncResult.addedCount} favorites from cloud.'
-            : 'Synced! Everything up to date.';
-
-        emit(FavoritesSynced(message));
-        add(const LoadFavoritesEvent());
-      },
-    );
+      emit(FavoritesSynced(message));
+      add(const LoadFavoritesEvent());
+    } catch (e) {
+      emit(FavoritesFailure(e.toString()));
+    }
   }
 
   Future<void> _onGenerateQRCode(
@@ -238,7 +237,8 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     Emitter<FavoritesState> emit,
   ) async {
     try {
-      final importedCount = await _syncService.importFromQRCode(event.qrData);
+      final imported = await _syncService.importFromQRCode(event.qrData);
+      final importedCount = imported.length;
       emit(FavoritesImportedFromQR(importedCount));
       add(const LoadFavoritesEvent());
     } catch (e) {

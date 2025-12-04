@@ -8,7 +8,7 @@ void main() {
     'complete download flow E2E test',
     ($) async {
       // Launch the app
-      await app.main();
+      app.main();
       await $.pumpAndSettle();
 
       // Verify app launched successfully
@@ -78,7 +78,7 @@ void main() {
   patrolTest(
     'UI responsiveness test',
     ($) async {
-      await app.main();
+      app.main();
       await $.pumpAndSettle();
 
       // Test rapid tab switching
@@ -90,7 +90,7 @@ void main() {
       }
 
       await $.pumpAndSettle();
-      expect(tester.takeException(), isNull);
+      expect($.tester.takeException(), isNull);
 
       // Test rapid dialog open/close
       for (int i = 0; i < 3; i++) {
@@ -100,14 +100,14 @@ void main() {
         await $.pumpAndSettle();
       }
 
-      expect(tester.takeException(), isNull);
+      expect($.tester.takeException(), isNull);
     },
   );
 
   patrolTest(
     'accessibility test',
     ($) async {
-      await app.main();
+      app.main();
       await $.pumpAndSettle();
 
       // Verify semantic labels are present
@@ -128,7 +128,7 @@ void main() {
   patrolTest(
     'theme switching test',
     ($) async {
-      await app.main();
+      app.main();
       await $.pumpAndSettle();
 
       // Verify Material Design 3 is applied
@@ -143,7 +143,7 @@ void main() {
   patrolTest(
     'error handling test',
     ($) async {
-      await app.main();
+      app.main();
       await $.pumpAndSettle();
 
       // Test invalid URL submission

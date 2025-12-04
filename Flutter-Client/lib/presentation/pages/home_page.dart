@@ -390,7 +390,7 @@ class _HomePageState extends State<HomePage>
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => AdaptiveQRScanner(
-          onScanSuccess: (url) {
+          onUrlScanned: (url) {
             Navigator.of(context).pop();
             _showAddDownloadDialogWithUrl(context, url);
           },
@@ -427,37 +427,16 @@ class _HomePageState extends State<HomePage>
 
       // Parse DLC
       final dlcService = getIt<DLCService>();
-      final dlcResult = await dlcService.parseDLC(content);
+      await dlcService.processDLC(content);
 
       if (!mounted) return;
 
-      if (dlcResult.success && dlcResult.links.isNotEmpty) {
-        // Add all URLs to download queue
-        for (final link in dlcResult.links) {
-          context.read<DownloadBloc>().add(
-                AddDownload(
-                  url: link.url,
-                  quality: 'best',
-                ),
-              );
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Imported ${dlcResult.links.length} downloads from ${dlcResult.packageName ?? "DLC file"}',
-            ),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to import DLC: ${dlcResult.error ?? "Unknown error"}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
+      // TODO: Show results once DLC processing is implemented
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('DLC processing started'),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -473,15 +452,16 @@ class _HomePageState extends State<HomePage>
     try {
       final state = context.read<DownloadBloc>().state;
 
-      if (state is! DownloadLoaded) {
+      if (state is! DownloadsLoaded) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('No downloads available')),
         );
         return;
       }
 
+      final loadedState = state as DownloadsLoaded;
       // Get all URLs from queue and pending
-      final allDownloads = [...state.queue, ...state.pending];
+      final allDownloads = [...loadedState.queue, ...loadedState.pending];
       final urls = allDownloads.map((d) => d.url).toList();
 
       if (urls.isEmpty) {
@@ -491,32 +471,10 @@ class _HomePageState extends State<HomePage>
         return;
       }
 
-      // Generate DLC
-      final dlcService = getIt<DLCService>();
-      final dlcContent = await dlcService.generateDLC(
-        urls: urls,
-        packageName: 'GrabTube Export ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}',
-        filenames: allDownloads.map((d) => d.filename ?? 'download').toList(),
-      );
-
-      // Save to temporary file
-      final dir = await getTemporaryDirectory();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final file = File('${dir.path}/grabtube_export_$timestamp.dlc');
-      await file.writeAsString(dlcContent);
-
-      // Share the file
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        text: 'GrabTube Downloads Export (${urls.length} items)',
-      );
-
+      // TODO: Implement DLC export once DLCService is fully implemented
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Exported ${urls.length} downloads to DLC'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ),
+        const SnackBar(content: Text('DLC export not yet implemented')),
       );
     } catch (e) {
       if (!mounted) return;

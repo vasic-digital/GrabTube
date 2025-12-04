@@ -221,13 +221,13 @@ class _SearchPageState extends State<SearchPage> {
               download: download,
               onDelete: () {
                 context.read<DownloadBloc>().add(
-                      DeleteDownloadEvent(download.id),
+                      DeleteDownloads(ids: [download.id]),
                     );
               },
               onStart: download.status.name.toLowerCase() == 'pending'
                   ? () {
                       context.read<DownloadBloc>().add(
-                            StartDownloadEvent(download.id),
+                            StartDownloads(ids: [download.id]),
                           );
                     }
                   : null,

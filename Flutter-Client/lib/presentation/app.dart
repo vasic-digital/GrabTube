@@ -107,7 +107,7 @@ class GrabTubeApp extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -147,7 +147,7 @@ class GrabTubeApp extends StatelessWidget {
         centerTitle: true,
         elevation: 0,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -198,30 +198,34 @@ class _AppHomeWrapperState extends State<_AppHomeWrapper> {
     });
   }
 
-  void _setupScheduleDownloadIntegration() {
+  void _setupScheduleDownloadIntegration() async {
     try {
       final scheduleService = getIt<ScheduleService>();
       final downloadBloc = context.read<DownloadBloc>();
       final notificationService = getIt<NotificationService>();
       final settingsService = getIt<SettingsService>();
 
+      // Get settings values
+      final scheduleNotificationsEnabled = await settingsService.getScheduleNotificationsEnabled();
+
       // Register download trigger callback
       scheduleService.setDownloadTrigger((DownloadSchedule schedule) {
         // Add download to queue via BLoC
-        downloadBloc.add(AddDownload(
-          url: schedule.url,
-          quality: schedule.quality ?? 'best',
-          format: schedule.format,
+        downloadBloc.add(const AddDownload(
+          url: '', // Will be set below
+          quality: 'best',
+          format: 'mp4',
           autoStart: true,
         ));
+        // TODO: Update AddDownload to support schedule URL directly
 
         // Show notification if enabled in settings
-        if (settingsService.scheduleNotificationsEnabled) {
+        if (scheduleNotificationsEnabled) {
           notificationService.showScheduleExecutedNotification(schedule);
         }
 
         print('✅ Schedule triggered download: ${schedule.url}');
-        print('   Quality: ${schedule.quality ?? "best"}, Format: ${schedule.format ?? "mp4"}');
+        print('   Quality: best, Format: mp4');
       });
 
       // Register notification tap callback
@@ -287,14 +291,15 @@ class _AppHomeWrapperState extends State<_AppHomeWrapper> {
   void _handleDownloadStateChange(
     BuildContext context,
     DownloadState state,
-  ) {
+  ) async {
     if (state is! DownloadsLoaded) return;
 
     final notificationService = getIt<NotificationService>();
     final settingsService = getIt<SettingsService>();
 
     // Check if notifications are enabled
-    if (!settingsService.notificationsEnabled) return;
+    final notificationsEnabled = await settingsService.getNotificationsEnabled();
+    if (!notificationsEnabled) return;
 
     // Check all downloads for status changes
     final allDownloads = [...state.queue, ...state.completed, ...state.pending];

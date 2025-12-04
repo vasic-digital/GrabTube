@@ -1,4 +1,5 @@
 import '../entities/download.dart';
+import '../entities/sync_result.dart';
 import '../usecases/favorites/sync_favorites_usecase.dart';
 
 /// Repository interface for favorites operations

@@ -180,7 +180,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 secondary: const Icon(Icons.play_arrow),
               ),
               ListTile(
-                leading: const Icon(Icons.download_multiple),
+                leading: const Icon(Icons.cloud_download_outlined),
                 title: const Text('Max Concurrent Downloads'),
                 subtitle: Text('${state.maxConcurrentDownloads} downloads at once'),
                 trailing: const Icon(Icons.chevron_right),

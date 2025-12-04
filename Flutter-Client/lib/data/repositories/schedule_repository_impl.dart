@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:injectable/injectable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../domain/entities/download_schedule.dart';
 import '../../domain/repositories/schedule_repository.dart';
 import '../models/download_schedule_model.dart';
 
 /// Implementation of ScheduleRepository using Hive
-@LazySingleton(as: ScheduleRepository)
 class ScheduleRepositoryImpl implements ScheduleRepository {
   ScheduleRepositoryImpl(this._schedulesBox);
 
@@ -51,6 +49,11 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   }
 
   @override
+  Future<DownloadSchedule?> getScheduleById(String id) async {
+    return getSchedule(id);
+  }
+
+  @override
   Future<List<DownloadSchedule>> getPendingSchedules() async {
     final schedules = await getSchedules();
     return schedules.where((s) => s.status == ScheduleStatus.pending).toList();
@@ -59,7 +62,10 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
   @override
   Future<List<DownloadSchedule>> getDueSchedules() async {
     final schedules = await getPendingSchedules();
-    return schedules.where((s) => s.isDue).toList();
+    final now = DateTime.now();
+    return schedules
+        .where((s) => s.nextExecutionTime != null && s.nextExecutionTime!.isBefore(now))
+        .toList();
   }
 
   @override
@@ -136,7 +142,6 @@ class ScheduleRepositoryImpl implements ScheduleRepository {
     }
   }
 
-  @disposeMethod
   void dispose() {
     _schedulesController.close();
   }

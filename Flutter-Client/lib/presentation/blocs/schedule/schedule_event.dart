@@ -53,3 +53,14 @@ class ExecuteScheduleEvent extends ScheduleEvent {
 class SchedulesUpdatedEvent extends ScheduleEvent {
   const SchedulesUpdatedEvent();
 }
+
+class RefreshSchedulesEvent extends ScheduleEvent {
+  const RefreshSchedulesEvent();
+}
+
+class ToggleScheduleEvent extends ScheduleEvent {
+  const ToggleScheduleEvent(this.scheduleId);
+  final String scheduleId;
+  @override
+  List<Object?> get props => [scheduleId];
+}

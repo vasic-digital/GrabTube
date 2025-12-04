@@ -14,6 +14,11 @@ class LoadJDownloaderInstancesEvent extends JDownloaderEvent {
   const LoadJDownloaderInstancesEvent();
 }
 
+/// Event to refresh all JDownloader instances
+class RefreshJDownloaderInstancesEvent extends JDownloaderEvent {
+  const RefreshJDownloaderInstancesEvent();
+}
+
 /// Event to load a specific instance by ID
 class LoadJDownloaderInstanceByIdEvent extends JDownloaderEvent {
   const LoadJDownloaderInstanceByIdEvent(this.instanceId);

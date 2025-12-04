@@ -63,3 +63,25 @@ class ScheduleFailure extends ScheduleState {
   @override
   List<Object?> get props => [error];
 }
+
+class ScheduleLoading extends ScheduleState {
+  const ScheduleLoading();
+}
+
+class ScheduleError extends ScheduleState {
+  const ScheduleError(this.error);
+  final String error;
+  @override
+  List<Object?> get props => [error];
+}
+
+class ScheduleOperationInProgress extends ScheduleState {
+  const ScheduleOperationInProgress();
+}
+
+class ScheduleOperationSuccess extends ScheduleState {
+  const ScheduleOperationSuccess(this.message);
+  final String message;
+  @override
+  List<Object?> get props => [message];
+}

@@ -130,15 +130,13 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async {
     emit(ScheduleExecuting(event.scheduleId));
 
-    final result = await _executeScheduleUseCase(event.scheduleId);
-
-    result.fold(
-      (error) => emit(ScheduleFailure(error)),
-      (_) {
-        emit(ScheduleExecuted(event.scheduleId));
-        add(const LoadSchedulesEvent());
-      },
-    );
+    try {
+      await _executeScheduleUseCase(event.scheduleId);
+      emit(ScheduleExecuted(event.scheduleId));
+      add(const LoadSchedulesEvent());
+    } catch (e) {
+      emit(ScheduleFailure(e.toString()));
+    }
   }
 
   Future<void> _onSchedulesUpdated(

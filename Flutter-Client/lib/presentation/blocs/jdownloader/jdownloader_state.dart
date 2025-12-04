@@ -50,6 +50,11 @@ class JDownloaderFailure extends JDownloaderState {
   List<Object?> get props => [error];
 }
 
+/// State when authentication is required
+class JDownloaderAuthRequired extends JDownloaderState {
+  const JDownloaderAuthRequired();
+}
+
 /// State when adding an instance
 class JDownloaderInstanceAdding extends JDownloaderState {
   const JDownloaderInstanceAdding();

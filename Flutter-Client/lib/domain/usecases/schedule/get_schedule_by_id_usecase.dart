@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../../entities/schedule.dart';
+import '../../entities/download_schedule.dart';
 import '../../repositories/schedule_repository.dart';
 
 /// Use case for getting a schedule by ID
@@ -8,7 +8,7 @@ class GetScheduleByIdUseCase {
 
   GetScheduleByIdUseCase(this._repository);
 
-  Future<Either<String, Schedule>> call(String scheduleId) async {
+  Future<Either<String, DownloadSchedule>> call(String scheduleId) async {
     try {
       if (scheduleId.isEmpty) {
         return const Left('Schedule ID cannot be empty');

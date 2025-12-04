@@ -131,7 +131,7 @@ class NotificationService {
       await _notifications.show(
         schedule.id.hashCode,
         'Scheduled Download Started',
-        '$title (${schedule.quality ?? "best"})',
+        title,
         notificationDetails,
         payload: 'schedule:${schedule.id}',
       );

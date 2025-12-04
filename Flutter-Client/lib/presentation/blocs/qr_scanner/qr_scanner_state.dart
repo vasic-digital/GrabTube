@@ -39,6 +39,16 @@ class QRScannerFailure extends QRScannerState {
   List<Object?> get props => [error];
 }
 
+/// State when scanning is loading
+class QRScannerLoading extends QRScannerState {
+  const QRScannerLoading();
+}
+
+/// State when camera permission is required
+class QRScannerPermissionRequired extends QRScannerState {
+  const QRScannerPermissionRequired();
+}
+
 /// State when scan history is loaded
 class QRScannerHistoryLoaded extends QRScannerState {
   const QRScannerHistoryLoaded(this.history);

@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:dio/dio.dart';
 import '../../domain/entities/download.dart';
+import '../../domain/entities/sync_result.dart';
 import '../../domain/repositories/favorites_repository.dart';
 import '../../domain/usecases/favorites/sync_favorites_usecase.dart';
 import '../../core/services/favorites_sync_service.dart';
@@ -172,7 +173,12 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
   @override
   Future<SyncResult> syncFavorites() async {
     try {
-      final result = await _syncService.performSync();
+      final favorites = await getFavorites();
+      final serverUrl = await _dio.options.baseUrl;
+      final result = await _syncService.syncFavorites(
+        serverUrl: serverUrl,
+        localFavorites: favorites,
+      );
       await _notifyFavoritesChanged();
       return result;
     } catch (e) {

@@ -5,7 +5,11 @@ import 'package:grabtube/domain/entities/download.dart';
 import 'package:grabtube/presentation/widgets/hierarchical_download_manager.dart';
 
 // Mock classes
-class MockVoidCallback extends Mock implements VoidCallback {}
+class MockVoidCallback extends Mock {
+  void call() => super.noSuchMethod(
+    Invocation.method(#call, []),
+  );
+}
 
 void main() {
   late List<DownloadGroup> testGroups;
@@ -81,9 +85,9 @@ void main() {
           home: Scaffold(
             body: HierarchicalDownloadManager(
               downloadGroups: testGroups,
-              onStartAll: mockOnStartAll.call,
-              onPauseAll: mockOnPauseAll.call,
-              onCancelAll: mockOnCancelAll.call,
+              onStartAll: () => mockOnStartAll(),
+              onPauseAll: () => mockOnPauseAll(),
+              onCancelAll: () => mockOnCancelAll(),
             ),
           ),
         ),
@@ -255,9 +259,9 @@ void main() {
           home: Scaffold(
             body: HierarchicalDownloadManager(
               downloadGroups: testGroups,
-              onStartAll: mockOnStartAll.call,
-              onPauseAll: mockOnPauseAll.call,
-              onCancelAll: mockOnCancelAll.call,
+              onStartAll: () => mockOnStartAll(),
+              onPauseAll: () => mockOnPauseAll(),
+              onCancelAll: () => mockOnCancelAll(),
             ),
           ),
         ),
